@@ -28,7 +28,7 @@
     {
       "id": "P5",
       "title": "Approved reference facts",
-      "text": "Approved facts for checking claims. 1) The 2025 internal fraud review found no significant difference in fraud rates between customer groups. 2) Complaint data does not record customer ethnicity. A claim that contradicts an approved fact may be inaccurate. A claim not covered here is neither confirmed nor refuted.",
+      "text": "Approved facts for checking claims. 1) The 2025 internal fraud review found no significant difference in fraud rates between customer groups. 2) Complaint data does not record customer ethnicity. 3) Harbourview Council Notice 2026-14 (published 12 October 2026): from 2 November 2026 library branches open at 9:00 am on weekdays; Saturday hours are 10:00 am to 4:00 pm. A claim that contradicts an approved fact may be inaccurate. A claim not covered here is neither confirmed nor refuted.",
       "rule": "Compare claims with these approved facts only. Contradiction suggests an accuracy concern. Do not treat an uncovered claim as false."
     },
     {

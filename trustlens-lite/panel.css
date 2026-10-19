@@ -76,6 +76,7 @@ button, textarea { font: inherit; color: inherit; }
 
 /* header */
 .top { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border-block-end: 1px solid var(--border); }
+.logo-mark { inline-size: 32px; block-size: 32px; flex: none; }
 .wordmark { font-size: var(--text-lg); font-weight: 700; line-height: 1.2; margin-inline-end: auto; }
 .wordmark span { font-weight: 400; color: var(--muted-foreground); }
 .demo-pill { white-space: nowrap; font-size: var(--text-sm); font-weight: 600; color: var(--accent); border: 1px dashed var(--accent); border-radius: var(--radius); padding: 2px var(--space-2); }
@@ -157,6 +158,7 @@ button, textarea { font: inherit; color: inherit; }
 .foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-3) var(--space-4); font-size: var(--text-sm); color: var(--muted-foreground); }
 
 /* empty, error, history */
+.empty-logo { inline-size: 144px; block-size: auto; margin-block-end: var(--space-2); }
 .message { padding: var(--space-4) var(--space-3); display: grid; gap: var(--space-2); justify-items: start; }
 .message h2 { font-size: var(--text-xl); font-weight: 700; line-height: 1.2; }
 .message.is-error { border-inline-start: 4px solid var(--concern); background: var(--concern-bg); }

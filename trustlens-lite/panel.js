@@ -1,5 +1,6 @@
 import { scanPii, countByType } from './pii.js';
 import { overallAction } from './rules.js';
+import { findDemoEntry, cacheKey } from './demo.js';
 
 const MAX_CHARS = 8000;
 const NS = 'http://www.w3.org/2000/svg';
@@ -91,6 +92,7 @@ function renderEmpty() {
   const hasText = $('text').value.trim().length > 0;
   $('input-wrap').open = true;
   show(h('section', { class: 'message' },
+    hasText ? null : h('img', { class: 'empty-logo', src: 'icons/logo.png', alt: 'TrustLens' }),
     h('h2', {}, hasText ? 'Ready to check' : 'Nothing checked yet'),
     h('p', {}, hasText
       ? 'The text is below. Choose Run check to assess it.'
@@ -221,11 +223,11 @@ function renderFinding([key, name], report, index, openByDefault) {
     body);
 }
 
-function renderReport({ report, findings, result, demo }) {
+function renderReport({ report, findings, result, note }) {
   const firstConcern = CHECKS.findIndex(([k]) => report[k].status === 'Concern');
   show(h('div', { class: 'report' },
     renderStamp(result),
-    demo ? h('p', { class: 'demo-note' }, 'Demo mode: this is a sample report, not a check of your text.') : null,
+    note ? h('p', { class: 'demo-note' }, note) : null,
     renderPrivacy(findings),
     h('div', { class: 'hl-bar', id: 'hl-bar', hidden: true }),
     h('div', { class: 'findings' }, CHECKS.map((c, i) => renderFinding(c, report, i, i === firstConcern))),
@@ -337,36 +339,76 @@ async function tryDemo() {
   runCheck();
 }
 
+const DEMO_DELAY_MS = 1500; // long enough for the loading state to be seen
+const CACHE_LIMIT = 50;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function cacheGet(key) {
+  return (await load('liveCache', {}))[key]?.report ?? null;
+}
+async function cachePut(key, report) {
+  const cache = await load('liveCache', {});
+  cache[key] = { report, ts: Date.now() };
+  const newest = Object.entries(cache).sort((x, y) => y[1].ts - x[1].ts).slice(0, CACHE_LIMIT);
+  await save('liveCache', Object.fromEntries(newest));
+}
+
 async function runCheck() {
   const id = ++runId;
   const settings = await getSettings();
-  const demo = settings.demoMode || PREVIEW;
   renderLoading();
   try {
     let text = $('text').value.trim();
-    let sample;
-    if (demo) {
-      sample = await loadSample();
+    let report;
+    let note = null; // line shown under the stamp when the report was not a fresh live check
+
+    if (PREVIEW) { // static preview for design review: never touches the network
+      const sample = await loadSample();
       text = sample.text;
       $('text').value = text;
       updateInputMeta();
-      await new Promise((r) => setTimeout(r, 500));
+      await sleep(500);
+      report = sample.report;
+      note = 'Demo mode: this is a sample report, not a check of your text.';
     }
     if (!text) { renderEmpty(); return; }
-    const { maskedText, findings } = scanPii(text.slice(0, MAX_CHARS)); // only maskedText leaves this function
-    let report;
-    if (demo) {
-      report = sample.report;
-    } else {
-      if (!settings.apiKey) throw new Error('No API key is set.');
-      const [{ assess }, { policiesForPrompt }] = await Promise.all([import('./assess.js'), import('./policies.js')]);
-      report = await assess(maskedText, policiesForPrompt(), settings);
+    const { maskedText, findings } = scanPii(text.slice(0, MAX_CHARS)); // only maskedText ever leaves this function
+
+    if (!report && settings.demoMode) {
+      const entry = findDemoEntry(text, await loadDemoEntries());
+      if (entry) {
+        await sleep(DEMO_DELAY_MS);
+        report = entry.report;
+        note = `Demo mode: this is a saved report for the demo email “${entry.subject}”.`;
+      }
+    }
+    if (!report) {
+      const key = await cacheKey(maskedText);
+      report = await cacheGet(key);
+      if (report) {
+        note = 'Replayed from an earlier check of the same text.';
+      } else {
+        if (!settings.apiKey) {
+          throw new Error(settings.demoMode
+            ? 'Demo mode has no saved report for this text, and no API key is set for a live check.'
+            : 'No API key is set.');
+        }
+        const [{ assess }, { policiesForPrompt }] = await Promise.all([import('./assess.js'), import('./policies.js')]);
+        report = await assess(maskedText, policiesForPrompt(), settings);
+        await cachePut(key, report);
+      }
     }
     if (id !== runId) return;
-    await finish({ report, findings, result: overallAction(report, findings), demo });
+    await finish({ report, findings, result: overallAction(report, findings), note });
   } catch (err) {
     if (id === runId) renderError(err.message || String(err));
   }
+}
+
+let demoEntries;
+async function loadDemoEntries() {
+  demoEntries ??= await (await fetch('demo-results.json')).json();
+  return demoEntries;
 }
 
 // ---------- wiring ----------

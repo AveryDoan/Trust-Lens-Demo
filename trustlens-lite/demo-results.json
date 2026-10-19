@@ -1,0 +1,220 @@
+[
+  {
+    "id": "A",
+    "subject": "Fraud trend - we need to tighten onboarding",
+    "file": "demo/emails/a.txt",
+    "matchPhrases": [
+      "customers under 25 are far more likely to commit fraud",
+      "14-day hold on every new account"
+    ],
+    "report": {
+      "bias": {
+        "status": "Concern",
+        "confidence": "high",
+        "summary": "Potential concern: the email links fraud to customers under 25 as a group and proposes different treatment for them.",
+        "evidence": [
+          "customers under 25 are far more likely to commit fraud than everyone else",
+          "younger people just don't take rules seriously"
+        ],
+        "next_step": "Remove the age-based generalisation and base any checks on evidence about behaviour."
+      },
+      "accuracy": {
+        "status": "Concern",
+        "confidence": "high",
+        "summary": "The fraud claim appears to conflict with the approved 2025 fraud review, and the 40% figure has no source.",
+        "evidence": [
+          "customers under 25 are far more likely to commit fraud than everyone else",
+          "About 40% of our confirmed cases come from that group"
+        ],
+        "next_step": "Check the claim against the 2025 internal fraud review before using it.",
+        "claims": [
+          {
+            "claim": "Customers under 25 are more likely to commit fraud",
+            "label": "contradicted",
+            "source": "P5"
+          },
+          {
+            "claim": "About 40% of confirmed cases come from that group",
+            "label": "unverified",
+            "source": ""
+          }
+        ]
+      },
+      "deception": {
+        "status": "Check",
+        "confidence": "medium",
+        "summary": "Some signals suggest the 40% figure has no source. These are not proof of intent.",
+        "evidence": [
+          "It is obvious to anyone on the front line",
+          "About 40% of our confirmed cases come from that group"
+        ],
+        "next_step": "Ask Sam for the data behind the 40% figure.",
+        "signals": [
+          "Appeal to common knowledge (\"obvious to anyone\")",
+          "Statistic given without a named source or date"
+        ]
+      },
+      "governance": {
+        "status": "Check",
+        "confidence": "high",
+        "summary": "The email names a customer and includes contact details from a complaint record.",
+        "evidence": [
+          "last month's complaint from Jordan Whitfield"
+        ],
+        "next_step": "Mask the customer details before using the text with any AI tool or sharing it.",
+        "classification": "Confidential - Personal Information",
+        "pii_types": [
+          "name",
+          "email",
+          "phone"
+        ],
+        "retention": "Keep for seven years after case closure, then review for disposal.",
+        "ai_use_allowed": false,
+        "policy_ids": [
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P5"
+        ]
+      }
+    }
+  },
+  {
+    "id": "B",
+    "subject": "FWD: READ THIS before Friday!!!",
+    "file": "demo/emails/b.txt",
+    "matchPhrases": [
+      "wipe 90% of all staff emails this Friday",
+      "Only a fool would trust the official line"
+    ],
+    "report": {
+      "bias": {
+        "status": "OK",
+        "confidence": "high",
+        "summary": "No signs of bias against a group of people were found.",
+        "evidence": [],
+        "next_step": "Keep the wording neutral if you reply."
+      },
+      "accuracy": {
+        "status": "Check",
+        "confidence": "medium",
+        "summary": "The claim that 90% of staff emails will be wiped is unverified.",
+        "evidence": [
+          "wipe 90% of all staff emails this Friday"
+        ],
+        "next_step": "Ask the records team whether any such disposal is planned.",
+        "claims": [
+          {
+            "claim": "90% of all staff emails will be wiped this Friday",
+            "label": "unverified",
+            "source": ""
+          },
+          {
+            "claim": "A new retention rule was pushed through in secret",
+            "label": "unverified",
+            "source": ""
+          }
+        ]
+      },
+      "deception": {
+        "status": "Concern",
+        "confidence": "medium",
+        "summary": "Potential concern: loaded language, and no named author, date or source. These are signals, not proof of intent.",
+        "evidence": [
+          "SHOCKING: management is about to wipe 90% of all staff emails this Friday",
+          "Only a fool would trust the official line",
+          "Share this with everyone in your team NOW before it's too late!"
+        ],
+        "next_step": "Check the claim with the records team before forwarding it.",
+        "signals": [
+          "Loaded and urgent language (\"SHOCKING\", \"NOW\")",
+          "No author, date or source named",
+          "Pressure to forward the message widely"
+        ]
+      },
+      "governance": {
+        "status": "OK",
+        "confidence": "high",
+        "summary": "The text appears to contain no personal information.",
+        "evidence": [],
+        "next_step": "Keep it inside the organisation.",
+        "classification": "Internal",
+        "pii_types": [],
+        "retention": "No retention rule found in the policy pack.",
+        "ai_use_allowed": true,
+        "policy_ids": [
+          "P1"
+        ]
+      }
+    }
+  },
+  {
+    "id": "C",
+    "subject": "Library opening hours from 2 November (public notice)",
+    "file": "demo/emails/c.txt",
+    "matchPhrases": [
+      "Council Notice 2026-14",
+      "cleared for the public newsletter"
+    ],
+    "report": {
+      "bias": {
+        "status": "OK",
+        "confidence": "high",
+        "summary": "No signs of one-sided wording were found.",
+        "evidence": [],
+        "next_step": "Keep the wording as it is."
+      },
+      "accuracy": {
+        "status": "OK",
+        "confidence": "high",
+        "summary": "The opening hours match the approved Council notice.",
+        "evidence": [
+          "Harbourview Library branches will open at 9:00 am on weekdays",
+          "Saturday hours stay 10:00 am to 4:00 pm"
+        ],
+        "next_step": "Cite Council Notice 2026-14 when you share this.",
+        "claims": [
+          {
+            "claim": "Branches open at 9:00 am on weekdays from 2 November 2026",
+            "label": "supported",
+            "source": "P5"
+          },
+          {
+            "claim": "Saturday hours are 10:00 am to 4:00 pm",
+            "label": "supported",
+            "source": "P5"
+          }
+        ]
+      },
+      "deception": {
+        "status": "OK",
+        "confidence": "high",
+        "summary": "The email names its source, date and approver.",
+        "evidence": [
+          "Source: Harbourview Council Notice 2026-14, published 12 October 2026"
+        ],
+        "next_step": "Keep the source line with the text.",
+        "signals": []
+      },
+      "governance": {
+        "status": "OK",
+        "confidence": "high",
+        "summary": "The notice is marked as approved for public release.",
+        "evidence": [
+          "cleared for the public newsletter"
+        ],
+        "next_step": "Share it with anyone who needs it.",
+        "classification": "Public",
+        "pii_types": [],
+        "retention": "No retention rule found in the policy pack.",
+        "ai_use_allowed": true,
+        "policy_ids": [
+          "P1",
+          "P5",
+          "P6"
+        ]
+      }
+    }
+  }
+]

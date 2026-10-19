@@ -12,6 +12,7 @@ globalThis.__trustlens ??= (() => {
   };
   const marks = new Map(); // id -> <mark>
   let counter = 0;
+  let generation = 0; // bumped by clearHighlights so a pending re-apply never runs after a clear
 
   const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -30,7 +31,7 @@ globalThis.__trustlens ??= (() => {
   }
 
   // Whitespace-tolerant, because innerText and selections collapse runs of spaces and line breaks.
-  function wrapFirstMatch(check, quote) {
+  function wrapFirstMatch(check, quote, reuseId) {
     const re = new RegExp(quote.trim().split(/\s+/).map(escapeRegExp).join('\\s+'));
     for (const node of textNodes()) {
       const m = re.exec(node.data);
@@ -39,7 +40,7 @@ globalThis.__trustlens ??= (() => {
       target.splitText(m[0].length);
       const mark = document.createElement('mark');
       const look = LOOK[check];
-      const id = `tl-${++counter}`;
+      const id = reuseId ?? `tl-${++counter}`;
       mark.setAttribute('data-trustlens', check);
       mark.setAttribute('data-trustlens-id', id);
       mark.setAttribute('title', `TrustLens: ${look.label}`);
@@ -56,6 +57,7 @@ globalThis.__trustlens ??= (() => {
   }
 
   function clearHighlights() {
+    generation++;
     let removed = 0;
     for (const mark of document.querySelectorAll('mark[data-trustlens]')) {
       const text = mark.firstChild;
@@ -88,7 +90,19 @@ globalThis.__trustlens ??= (() => {
       }
     }
     const highlighted = items.filter((i) => i.id).length;
+    const myGeneration = generation;
+    setTimeout(() => reapplyOnce(items, myGeneration), 500);
     return { items, highlighted, skipped: items.length - highlighted };
+  }
+
+  // Gmail re-renders message bodies, which drops our marks. One retry, no observer, so we never fight the page.
+  function reapplyOnce(items, myGeneration) {
+    if (myGeneration !== generation) return;
+    for (const item of items) {
+      if (!item.id || marks.get(item.id)?.isConnected) continue;
+      marks.delete(item.id);
+      try { wrapFirstMatch(item.check, item.quote, item.id); } catch { /* skipped quietly */ }
+    }
   }
 
   function scrollToHighlight(id) {
@@ -114,9 +128,16 @@ globalThis.__trustlens ??= (() => {
   if (sel) return { text: sel, source: 'selection' };
 
   const len = (el) => (el.innerText || '').trim().length;
+
+  // Gmail: read the open message body. div.a3s is the message body container at the time of writing;
+  // class names change, so fall back to the page's main text if it is missing.
+  const gmailBodies = [...document.querySelectorAll('div.a3s')]
+    .filter((el) => el.checkVisibility?.({ checkVisibilityCSS: true }) !== false && len(el) > 0);
+  if (gmailBodies.length) return { text: gmailBodies.map((el) => el.innerText.trim()).join('\n\n'), source: 'Gmail message' };
+
   const article = document.querySelector('article');
   if (article && len(article) > 200) return { text: article.innerText.trim(), source: 'article' };
-  const main = document.querySelector('main');
+  const main = document.querySelector('main, [role="main"]');
   if (main && len(main) > 200) return { text: main.innerText.trim(), source: 'main' };
 
   // Largest text block: the container whose direct <p> children hold the most text.

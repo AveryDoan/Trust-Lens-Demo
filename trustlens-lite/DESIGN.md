@@ -33,7 +33,7 @@ Four steps (rem, 1rem = 16px): `--text-sm` 0.875 (14px: meta, badges), `--text-b
 150 to 200ms, `cubic-bezier(0.2, 0, 0, 1)` (ease-out). On report arrival the stamp fades and rises 6px over 200ms, then the four rows follow with 80ms stagger. No bounce. `prefers-reduced-motion: reduce` removes all animation.
 
 ## Components
-1. **Header**: wordmark, optional Demo mode pill (text plus dashed border), settings icon button.
+1. **Header**: logo mark (`icons/logo-mark.png`, from the supplied TrustLens logo, recoloured to its own grey `#737373` on a transparent background so it works on both themes), wordmark, optional Demo mode pill (text plus dashed border), settings icon button.
 2. **Stamp** (banner, full width, top rule 4px in the tone colour): icon, label (largest text), one-line reason, buttons Follow advice and Override. After a choice it shows what was recorded, with Undo. Override reveals an optional reason field.
 3. **Privacy line**: `<details>`, summary "3 items masked before checking", body lists types.
 4. **Finding row** (four siblings in one list, hairline between, no cards): `<details>` with summary showing status badge (icon + word + colour), name, one-sentence summary, confidence. Body: quotes, claims, signals, governance fields, next step.
