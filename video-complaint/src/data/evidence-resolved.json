@@ -1,0 +1,222 @@
+{
+  "resolved": {
+    "steps": {
+      "approve": [
+        {
+          "kind": "quote",
+          "doc": "agreement",
+          "label": "Agreement",
+          "shows": "Agreed rate",
+          "status": "verified",
+          "page": 1,
+          "file": "02-service-agreement-HRS-AGR-0311.pdf",
+          "text": "The standard rate is $3.85 per box (excluding GST)."
+        },
+        {
+          "kind": "quote",
+          "doc": "agreement",
+          "label": "Agreement",
+          "shows": "Rush needs a written request",
+          "status": "verified",
+          "page": 1,
+          "file": "02-service-agreement-HRS-AGR-0311.pdf",
+          "text": "If the Customer has not made a written rush request, the standard rate in clause 3 applies."
+        },
+        {
+          "kind": "quote",
+          "doc": "invoice",
+          "label": "Invoice",
+          "shows": "Why the invoice says it charged rush",
+          "status": "verified",
+          "page": 1,
+          "file": "INV-DEMO-20417.pdf",
+          "text": "Rush tier applied because processing was completed within 30 days of collection."
+        },
+        {
+          "kind": "quote",
+          "doc": "invoice",
+          "label": "Invoice",
+          "shows": "Amount paid",
+          "status": "verified",
+          "page": 1,
+          "file": "INV-DEMO-20417.pdf",
+          "text": "Payment received 2 October 2026: $22,044.00"
+        },
+        {
+          "kind": "quote",
+          "doc": "emails",
+          "label": "Emails",
+          "shows": "Customer says no rush was requested",
+          "status": "verified",
+          "page": 1,
+          "file": "Correspondence-thread.pdf",
+          "text": "We never asked for rush processing."
+        }
+      ],
+      "privacy": [
+        {
+          "kind": "quote",
+          "doc": "emails",
+          "label": "Emails",
+          "shows": "Our team asked for identity details",
+          "status": "verified",
+          "page": 1,
+          "file": "Correspondence-thread.pdf",
+          "text": "Before we can discuss it further, please confirm your identity."
+        },
+        {
+          "kind": "quote",
+          "doc": "emails",
+          "label": "Emails",
+          "shows": "Customer sent them by email",
+          "status": "verified",
+          "page": 2,
+          "file": "Correspondence-thread.pdf",
+          "text": "my date of birth is [DOB] and my home address is [ADDRESS]"
+        },
+        {
+          "kind": "quote",
+          "doc": "agreement",
+          "label": "Agreement",
+          "shows": "Agreement clause 7",
+          "status": "verified",
+          "page": 2,
+          "file": "02-service-agreement-HRS-AGR-0311.pdf",
+          "text": "Correspondence about a dispute is confidential and may be shared only with people who need it to resolve the matter."
+        }
+      ],
+      "refer": [
+        {
+          "kind": "quote",
+          "doc": "emails",
+          "label": "Emails",
+          "shows": "Internal message",
+          "status": "verified",
+          "page": 2,
+          "file": "Correspondence-thread.pdf",
+          "text": "Small regional clients always dispute invoices after paying and most of them give up if we stall for a month."
+        },
+        {
+          "kind": "quote",
+          "doc": "email",
+          "label": "Complaint email",
+          "shows": "Allegation, not shown in the documents",
+          "status": "verified",
+          "page": null,
+          "file": "Open email",
+          "text": "I also believe other customers have been overcharged in the same way, and I consider this fraud."
+        }
+      ],
+      "acknowledge": [
+        {
+          "kind": "quote",
+          "doc": "email",
+          "label": "Complaint email",
+          "shows": "A written complaint",
+          "status": "verified",
+          "page": null,
+          "file": "Open email",
+          "text": "I am formally complaining that Meridian Community Health Services was overcharged $11,880 on invoice INV-DEMO-20417."
+        },
+        {
+          "kind": "quote",
+          "doc": "email",
+          "label": "Complaint email",
+          "shows": "Customer's own deadline",
+          "status": "verified",
+          "page": null,
+          "file": "Open email",
+          "text": "If I do not receive a corrected invoice and a refund of $11,880 by Friday 23 October 2026"
+        }
+      ],
+      "verify": [
+        {
+          "kind": "quote",
+          "doc": "invoice",
+          "label": "Invoice",
+          "shows": "Date printed on the invoice",
+          "status": "verified",
+          "page": 1,
+          "file": "INV-DEMO-20417.pdf",
+          "text": "Invoice date 25 September 2026"
+        },
+        {
+          "kind": "metadata",
+          "doc": "invoice",
+          "label": "File details",
+          "shows": "When and how the file was made",
+          "status": "verified",
+          "page": null,
+          "file": "INV-DEMO-20417.pdf",
+          "fields": [
+            "Created with",
+            "Created",
+            "Modified",
+            "Author"
+          ]
+        }
+      ]
+    },
+    "callouts": {
+      "tuesday": [
+        {
+          "kind": "quote",
+          "doc": "agreement",
+          "label": "Agreement",
+          "shows": "Review limit",
+          "status": "verified",
+          "page": 2,
+          "file": "02-service-agreement-HRS-AGR-0311.pdf",
+          "text": "Harbourview will review it within 14 days of the notice."
+        },
+        {
+          "kind": "quote",
+          "doc": "email",
+          "label": "Complaint email",
+          "shows": "First notice",
+          "status": "verified",
+          "page": null,
+          "file": "Open email",
+          "text": "I first raised this on 6 October"
+        }
+      ]
+    }
+  },
+  "audit": {
+    "steps": [
+      {
+        "id": "approve",
+        "verified": 5,
+        "notFound": 0,
+        "notRead": 0
+      },
+      {
+        "id": "privacy",
+        "verified": 3,
+        "notFound": 0,
+        "notRead": 0
+      },
+      {
+        "id": "refer",
+        "verified": 2,
+        "notFound": 0,
+        "notRead": 0
+      },
+      {
+        "id": "acknowledge",
+        "verified": 2,
+        "notFound": 0,
+        "notRead": 0
+      },
+      {
+        "id": "verify",
+        "verified": 1,
+        "notFound": 0,
+        "notRead": 0
+      }
+    ],
+    "verified": 13,
+    "notFound": 0,
+    "notRead": 0
+  }
+}

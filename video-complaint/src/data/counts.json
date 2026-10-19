@@ -1,0 +1,34 @@
+{
+  "total": 16,
+  "byType": {
+    "address": 2,
+    "email": 10,
+    "phone": 3,
+    "dob": 1
+  },
+  "files": [
+    {
+      "role": "invoice",
+      "name": "INV-DEMO-20417.pdf",
+      "pages": 2,
+      "items": 2
+    },
+    {
+      "role": "agreement",
+      "name": "02-service-agreement-HRS-AGR-0311.pdf",
+      "pages": 2,
+      "items": 0
+    },
+    {
+      "role": "correspondence",
+      "name": "Correspondence-thread.pdf",
+      "pages": 2,
+      "items": 14
+    }
+  ],
+  "excerpt": [
+    "… on request. From: Elena Marsh [EMAIL] To: [EMAIL] Date: 6 October 2026 Subject: Invoice …",
+    "… To confirm my identity as you asked: my date of birth is [DOB] and my home address is [ADDRESS]. Clause 4 of the agreement says …",
+    "… Mobile [PHONE] From: Jordan Pike [EMAIL] …"
+  ]
+}

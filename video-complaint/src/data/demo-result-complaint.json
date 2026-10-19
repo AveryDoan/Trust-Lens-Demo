@@ -1,0 +1,290 @@
+{
+  "id": "case-complaint-meridian",
+  "matchAll": [
+    "INV-DEMO-20417",
+    "HRS-AGR-0311"
+  ],
+  "mode": "case",
+  "pack": "harbourview",
+  "overall": "escalate",
+  "stamp": {
+    "title": "Approve $11,880.00 refund and corrected invoice",
+    "reason": "Invoice is $11,880.00 above the signed agreement.",
+    "owner": "Billing Manager and Finance Director",
+    "due": "2026-10-23",
+    "basis": [
+      "H2.1",
+      "H3.1",
+      "H3.2"
+    ]
+  },
+  "checks": [
+    {
+      "key": "bias",
+      "label": "Bias",
+      "status": "ok",
+      "question": "Is the wording one-sided?",
+      "answer": "The complaint is firm and threatens media and legal action. The word 'fraud' is the customer's allegation, not a finding."
+    },
+    {
+      "key": "accuracy",
+      "label": "Accuracy",
+      "status": "concern",
+      "question": "Do the numbers and claims match the documents?",
+      "answer": "The invoice contradicts the agreement. The overcharge claim is supported. The fraud and other-customers claims are not shown in the documents."
+    },
+    {
+      "key": "misleading",
+      "label": "Misleading",
+      "status": "concern",
+      "question": "Does anything give a wrong impression?",
+      "answer": "The invoice note says rush applied because work finished within 30 days. Clause 4 requires a written rush request. An internal message suggests stalling clients.",
+      "quotes": [
+        {
+          "doc": "invoice",
+          "text": "Rush tier applied because processing was completed within 30 days of collection."
+        },
+        {
+          "doc": "agreement",
+          "text": "If the Customer has not made a written rush request, the standard rate in clause 3 applies."
+        },
+        {
+          "doc": "correspondence",
+          "text": "most of them give up if we stall for a month"
+        }
+      ]
+    },
+    {
+      "key": "governance",
+      "label": "Governance",
+      "status": "concern",
+      "question": "What should happen next, and under which rule?",
+      "answer": "Personal information was shared by email after the accounts team asked for it. A fraud allegation and an internal message need review by the Complaints Manager, not the accounts team.",
+      "found": [
+        "Date of birth",
+        "Home address",
+        "Mobile numbers",
+        "Email addresses"
+      ],
+      "basis": [
+        "H4.1",
+        "H4.2",
+        "H4.4",
+        "H1.3"
+      ],
+      "manage": [
+        {
+          "label": "Refund",
+          "text": "Hold the invoice, confirm clause 4 was not triggered, then issue the corrected invoice and refund. Billing Manager approves; Finance Director too, over $10,000.",
+          "basis": [
+            "H2.1",
+            "H3.1",
+            "H3.2"
+          ]
+        },
+        {
+          "label": "Privacy",
+          "text": "Restrict the thread to the complaints team and Privacy Officer. Report the exposure within 1 business day. Stop asking customers to email identity details.",
+          "basis": [
+            "H4.1",
+            "H4.2",
+            "H4.4"
+          ]
+        },
+        {
+          "label": "Conduct",
+          "text": "Refer the fraud allegation and the internal message to the Complaints Manager. The accounts team should not handle it.",
+          "basis": [
+            "H1.3"
+          ]
+        }
+      ]
+    }
+  ],
+  "noConcernsLine": "No concerns: Bias",
+  "case": {
+    "type": "billing complaint",
+    "documents": [
+      {
+        "name": "tax-invoice.pdf",
+        "role": "invoice",
+        "label": "Invoice",
+        "confidence": 0.97,
+        "keyFacts": [
+          "INV-DEMO-20417, issued 25 Sep 2026",
+          "Total $22,044.00 including GST",
+          "Paid in full on 2 Oct 2026"
+        ],
+        "pii": []
+      },
+      {
+        "name": "02-service-agreement-HRS-AGR-0311.pdf",
+        "role": "agreement",
+        "label": "Agreement",
+        "confidence": 0.98,
+        "keyFacts": [
+          "HRS-AGR-0311, signed 3 Mar 2026",
+          "$3.85 per box, total $10,164.00 including GST",
+          "Rush rate only on written request (clause 4)"
+        ],
+        "pii": []
+      },
+      {
+        "name": "Correspondence-thread.pdf",
+        "role": "correspondence",
+        "label": "Emails",
+        "confidence": 0.95,
+        "keyFacts": [
+          "Messages 6 to 12 Oct 2026",
+          "Customer asked for correction and refund",
+          "Includes an internal message about stalling"
+        ],
+        "pii": [
+          "date of birth",
+          "home address",
+          "mobile numbers",
+          "email addresses"
+        ]
+      }
+    ],
+    "claims": [
+      {
+        "claim": "Invoice is $11,880.00 higher than the agreement",
+        "status": "supported"
+      },
+      {
+        "claim": "Rush was never requested in writing",
+        "status": "supported by the correspondence provided"
+      },
+      {
+        "claim": "This is fraud",
+        "status": "not shown in the documents"
+      },
+      {
+        "claim": "Other customers were overcharged the same way",
+        "status": "not shown in the documents"
+      }
+    ],
+    "reconciliation": [
+      {
+        "item": "Rate per box (ex GST)",
+        "agreed": 3.85,
+        "billed": 8.35,
+        "difference": 4.5,
+        "quoteAgreed": "The standard rate is $3.85 per box (excluding GST).",
+        "quoteBilled": "Archive box digitisation, RUSH tier"
+      },
+      {
+        "item": "Subtotal (ex GST)",
+        "agreed": 9240.0,
+        "billed": 20040.0,
+        "difference": 10800.0,
+        "quoteAgreed": "For 2,400 boxes the total is $9,240.00 excluding GST",
+        "quoteBilled": "Subtotal (ex GST)"
+      },
+      {
+        "item": "GST (10%)",
+        "agreed": 924.0,
+        "billed": 2004.0,
+        "difference": 1080.0,
+        "quoteAgreed": "or $10,164.00 including GST",
+        "quoteBilled": "GST (10%)"
+      },
+      {
+        "item": "Total (incl GST)",
+        "agreed": 10164.0,
+        "billed": 22044.0,
+        "difference": 11880.0,
+        "quoteAgreed": "or $10,164.00 including GST",
+        "quoteBilled": "Payment received 2 October 2026: $22,044.00"
+      }
+    ],
+    "otherComparisons": [
+      {
+        "item": "Due date",
+        "agreed": "14 days after invoice date (9 Oct 2026)",
+        "billed": "9 Oct 2026",
+        "result": "matches"
+      }
+    ],
+    "totals": {
+      "agreedTotal": 10164.0,
+      "billedTotal": 22044.0,
+      "difference": 11880.0
+    },
+    "nextSteps": [
+      {
+        "rank": 1,
+        "action": "Acknowledge the complaint in writing",
+        "owner": "Complaints team",
+        "due": "2026-10-20",
+        "basis": [
+          "H1.1"
+        ]
+      },
+      {
+        "rank": 2,
+        "action": "Notify the Privacy Officer and restrict the email thread",
+        "owner": "Complaints team",
+        "due": "2026-10-20",
+        "basis": [
+          "H4.1",
+          "H4.2",
+          "H4.4"
+        ]
+      },
+      {
+        "rank": 3,
+        "action": "Refer the fraud allegation and internal message to the Complaints Manager",
+        "owner": "Complaints Manager",
+        "due": "2026-10-20",
+        "basis": [
+          "H1.3"
+        ]
+      },
+      {
+        "rank": 4,
+        "action": "Confirm invoice INV-DEMO-20417 exists in the billing system",
+        "owner": "Billing Manager",
+        "due": "2026-10-20",
+        "basis": [
+          "H2.3"
+        ],
+        "onlyIf": "provenance signals on the invoice"
+      }
+    ],
+    "outcomeDue": {
+      "date": "2026-11-02",
+      "basis": [
+        "H1.2"
+      ]
+    },
+    "dueDateNote": "Due dates count weekdays from Mon 19 Oct 2026. Public holidays are ignored."
+  },
+  "provenance": {
+    "tax-invoice.pdf": {
+      "signals": [
+        "P1",
+        "P3",
+        "P4"
+      ],
+      "summary": "3 signals: verify at source",
+      "demoMetadata": {
+        "creator": "Canva",
+        "producer": "Canva",
+        "created": "2026-10-18T21:14:00+11:00",
+        "modified": "2026-10-19T08:02:00+11:00",
+        "author": "Elena Marsh"
+      }
+    },
+    "02-service-agreement-HRS-AGR-0311.pdf": {
+      "signals": [],
+      "summary": "No signals. This does not prove it is genuine."
+    },
+    "Correspondence-thread.pdf": {
+      "signals": [],
+      "summary": "No signals. This does not prove it is genuine."
+    }
+  },
+  "auditHint": "Store roles, step ids, basis ids, redaction counts, gate decision, Run AI click and mode. Never store text."
+}

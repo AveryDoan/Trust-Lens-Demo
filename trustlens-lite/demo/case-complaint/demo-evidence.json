@@ -1,0 +1,36 @@
+{
+  "caseId": "case-complaint-meridian",
+  "note": "Quotes are matched against the redacted text of each file. Where a quote holds personal data it is stored in redacted form.",
+  "steps": {
+    "approve": [
+      { "doc": "agreement", "label": "Agreement", "text": "The standard rate is $3.85 per box (excluding GST).", "shows": "Agreed rate" },
+      { "doc": "agreement", "label": "Agreement", "text": "If the Customer has not made a written rush request, the standard rate in clause 3 applies.", "shows": "Rush needs a written request" },
+      { "doc": "invoice", "label": "Invoice", "text": "Rush tier applied because processing was completed within 30 days of collection.", "shows": "Why the invoice says it charged rush" },
+      { "doc": "invoice", "label": "Invoice", "text": "Payment received 2 October 2026: $22,044.00", "shows": "Amount paid" },
+      { "doc": "emails", "label": "Emails", "text": "We never asked for rush processing.", "shows": "Customer says no rush was requested" }
+    ],
+    "privacy": [
+      { "doc": "emails", "label": "Emails", "text": "Before we can discuss it further, please confirm your identity.", "shows": "Our team asked for identity details" },
+      { "doc": "emails", "label": "Emails", "text": "my date of birth is [DOB] and my home address is [ADDRESS]", "shows": "Customer sent them by email", "redacted": true },
+      { "doc": "agreement", "label": "Agreement", "text": "Correspondence about a dispute is confidential and may be shared only with people who need it to resolve the matter.", "shows": "Agreement clause 7" }
+    ],
+    "refer": [
+      { "doc": "emails", "label": "Emails", "text": "Small regional clients always dispute invoices after paying and most of them give up if we stall for a month.", "shows": "Internal message" },
+      { "doc": "email", "label": "Complaint email", "text": "I also believe other customers have been overcharged in the same way, and I consider this fraud.", "shows": "Allegation, not shown in the documents" }
+    ],
+    "acknowledge": [
+      { "doc": "email", "label": "Complaint email", "text": "I am formally complaining that Meridian Community Health Services was overcharged $11,880 on invoice INV-DEMO-20417.", "shows": "A written complaint" },
+      { "doc": "email", "label": "Complaint email", "text": "If I do not receive a corrected invoice and a refund of $11,880 by Friday 23 October 2026", "shows": "Customer's own deadline" }
+    ],
+    "verify": [
+      { "doc": "invoice", "label": "Invoice", "text": "Invoice date 25 September 2026", "shows": "Date printed on the invoice" },
+      { "kind": "metadata", "doc": "invoice", "label": "File details", "fields": ["Created with", "Created", "Modified", "Author"], "shows": "When and how the file was made" }
+    ]
+  },
+  "callouts": {
+    "tuesday": [
+      { "doc": "agreement", "label": "Agreement", "text": "Harbourview will review it within 14 days of the notice.", "shows": "Review limit" },
+      { "doc": "email", "label": "Complaint email", "text": "I first raised this on 6 October", "shows": "First notice" }
+    ]
+  }
+}

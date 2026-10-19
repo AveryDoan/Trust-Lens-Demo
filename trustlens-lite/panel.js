@@ -1,8 +1,12 @@
 import { scanPii, countByType } from './pii.js';
 import { overallAction } from './rules.js';
 import { findDemoEntry, cacheKey, sha256Hex } from './demo.js';
-import { extractFile, FileError, truncateAtWord, FILE_CHAR_LIMIT, formatSize } from './extract.js';
+import { extractFile, FileError, truncateAtWord, FILE_CHAR_LIMIT, formatSize, cleanText } from './extract.js';
 import { attachCitations, citationsFor, formatCitation, GUIDANCE_LABEL } from './cite.js';
+import { resolveEvidence, levelTwoItems, auditCounts, evidenceText, foundLine, NOT_FOUND, NOT_READ, CLUE } from './evidence.js';
+import { setPack, activePack } from './policies.js';
+import { ROLE_LABELS, detectRole, findSavedCase, verifyCase, formatDay, money, signedMoney, checkSignals, hasAgreement, withoutAgreement, NO_AGREEMENT_NOTE, uniqueFiles, fileSummary, deriveFindings, becauseLabel } from './case.js';
+import { isEmptyMeta, normaliseMeta, NOTE, CLEAN, provenanceSignals, provenanceSummary } from './provenance.js';
 
 const MAX_CHARS = 8000;
 const NS = 'http://www.w3.org/2000/svg';
@@ -26,7 +30,7 @@ const STATUS_UI = {
   Concern: { tone: 'concern', icon: 'i-stop' },
 };
 const CHECKS = [['bias', 'Bias'], ['accuracy', 'Accuracy'], ['deception', 'Deception risk'], ['governance', 'Governance']];
-const PII_WORDS = { email: 'email address', phone: 'phone number', tfn: 'tax file number', card: 'card number' };
+const PII_WORDS = { email: 'email address', phone: 'phone number', tfn: 'tax file number', card: 'card number', dob: 'date of birth', address: 'street address' };
 
 // ---------- small DOM helpers (text only: nothing from the page or the model is ever parsed as HTML) ----------
 function h(tag, props = {}, ...kids) {
@@ -63,14 +67,16 @@ async function save(key, value) {
 }
 async function getSettings() {
   return ext
-    ? ext.storage.local.get({ endpoint: '', model: '', apiKey: '', demoMode: false })
-    : { endpoint: '', model: '', apiKey: '', demoMode: true };
+    ? ext.storage.local.get({ endpoint: '', model: '', apiKey: '', demoMode: false, orgProfile: 'rimpa', gmailEnabled: false, gmailAddress: '' })
+    : { endpoint: '', model: '', apiKey: '', demoMode: true, orgProfile: params.get('profile') === 'harbourview' ? 'harbourview' : 'rimpa' };
 }
 
 // ---------- state ----------
 let runId = 0;
 let current = null; // { view, decision, entryId, openKey }
 let pageTabId = null;
+let pageUrl = '';
+const isGmailPage = () => /^https:\/\/mail\.google\.com\//.test(pageUrl);
 let fileInfo = null; // { name, kind, size, chars } while the text in the box came from a file
 
 const announce = (msg) => { $('live').textContent = msg; };
@@ -101,6 +107,7 @@ function renderEmpty() {
       ? 'The text is below. Choose Run check to assess it.'
       : 'Select text on any page, right-click, and choose “Check with TrustLens”.'),
     hasText ? null : h('p', { class: 'muted' }, 'With nothing selected, the toolbar button checks the main text of the page.'),
+    ext && isGmailPage() ? gmailBox() : null,
     h('div', { class: 'dropzone', id: 'dropzone' },
       h('p', {}, 'Or drop a file here: PDF, Word (.docx), text or Markdown.'),
       h('button', { class: 'btn', type: 'button', onclick: chooseFile }, 'Choose file'),
@@ -164,6 +171,8 @@ function renderDecision(area = $('decision'), overriding = false) {
         h('button', { class: 'btn btn-primary', type: 'button', onclick: () => setDecision({ kind: 'overridden', reason: input.value.trim() }) }, 'Save override'),
         h('button', { class: 'btn', type: 'button', onclick: () => renderDecision(area) }, 'Cancel'))));
     input.focus();
+  } else if (current?.view?.case) {
+    area.replaceChildren(); // the case view offers Follow advice and Override in the ... menu
   } else {
     area.replaceChildren(
       h('button', { class: 'btn btn-primary', type: 'button', onclick: () => setDecision({ kind: 'followed' }) }, 'Follow advice'),
@@ -181,7 +190,7 @@ async function setDecision(decision) {
 }
 
 // ---------- overflow menu ----------
-function renderMenu(result) {
+function renderMenu(result, lead = []) {
   const button = h('button', { class: 'icon-btn', type: 'button', id: 'more-btn', 'aria-label': 'More actions', 'aria-haspopup': 'menu', 'aria-expanded': 'false' }, icon('i-more'));
   const wrap = h('span', { class: 'menu-wrap' }, button);
   const closeMenu = (refocus = true) => {
@@ -195,9 +204,10 @@ function renderMenu(result) {
     const note = current?.view?.note;
     const menu = h('div', { class: 'menu', role: 'menu', 'aria-label': 'More actions' },
       note ? h('p', { class: 'small muted', style: 'padding:4px 8px' }, note) : null,
+      ...lead.map(([label, fn]) => item(label, fn)),
       item('Copy citation', () => copyCitation(result)),
       item('Show policy basis', () => openBasisSheet(result, button)),
-      item('Clear highlights', () => clearHighlights(true)),
+      current?.view?.case ? item('What was read', () => renderReadingState(current.view, current.view.reading.sources.length, 3, true)) : item('Clear highlights', () => clearHighlights(true)),
       item('Choose file', chooseFile),
       item('Show text checked', () => { setInputVisible(true); $('input-wrap').open = true; $('text').focus(); }));
     wrap.append(menu);
@@ -217,9 +227,7 @@ function renderMenu(result) {
   return wrap;
 }
 
-async function copyCitation(result) {
-  const date = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
-  const text = formatCitation(result.label, citationsFor(result.basis), date);
+async function copyText(text, flash) {
   let ok = true;
   try { await navigator.clipboard.writeText(text); }
   catch {
@@ -228,11 +236,14 @@ async function copyCitation(result) {
     ok = document.execCommand('copy');
     ta.remove();
   }
-  const msg = ok ? 'Citation copied.' : 'Copy failed.';
-  announce(msg);
-  const flash = $('copy-flash');
   if (flash) { flash.textContent = ok ? 'Copied' : 'Copy failed'; setTimeout(() => { flash.textContent = ''; }, 2000); }
+  announce(ok ? 'Copied.' : 'Copy failed.');
   return ok;
+}
+
+async function copyCitation(result, flash = $('copy-flash')) {
+  const date = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
+  return copyText(formatCitation(result.label, citationsFor(result.basis), date), flash);
 }
 
 // ---------- level 3: bottom sheet with the verbatim clause ----------
@@ -254,7 +265,7 @@ function openSheet(title, cites, opener, extra = []) {
     // One block, so the 4-line clamp cuts cleanly. " … " is the stored separator between passages.
     const clause = h('blockquote', { class: 'quote clause' }, p.quote);
     clauses.push(clause);
-    return h('div', { class: 'sheet-item' }, h('p', { class: 'sheet-ref' }, `RIMPA Global ${p.document} v${p.version}, s${p.section}`), clause);
+    return h('div', { class: 'sheet-item' }, h('p', { class: 'sheet-ref' }, `${activePack().citePrefix}${p.document} v${p.version}, s${p.section}`), clause);
   });
   const close = h('button', { class: 'btn btn-primary', type: 'button', onclick: closeSheet }, 'Close');
   const readMore = h('button', { class: 'btn', type: 'button', hidden: true, 'aria-expanded': 'false',
@@ -434,7 +445,9 @@ async function renderHistory() {
   announce('History.');
 }
 function backFromHistory() {
-  if (current?.view) { renderReport(current.view); } else renderEmpty();
+  if (current?.view?.case) renderCaseReport(current.view);
+  else if (current?.view) renderReport(current.view);
+  else renderEmpty();
 }
 
 // ---------- running a check ----------
@@ -478,6 +491,8 @@ async function cachePut(key, report) {
 async function runCheck() {
   const id = ++runId;
   const settings = await getSettings();
+  setPack(settings.orgProfile);
+  refreshFooter();
   await clearHighlights();
   renderLoading();
   try {
@@ -545,6 +560,606 @@ async function loadDemoEntries() {
   return demoEntries;
 }
 
+function refreshFooter(_modeText = '', single = false) {
+  // One footer line: the active policy pack. The case result uses the short name.
+  $('foot-pack').textContent = single ? `Policy basis: ${activePack().short}` : activePack().footer;
+}
+
+// ---------- case bundles: several files (plus the open email) checked together ----------
+let bundle = null; // { docs, settings, showOriginal }
+const TOKEN_RE = /(\[(?:EMAIL|PHONE|TFN|CARD|DOB|ADDRESS)\])/;
+const fmtDate = (iso) => (iso ? new Date(iso).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Australia/Sydney' }) : 'unknown');
+const SAVED_CASES = ['demo/case-complaint/demo-result-complaint.json'];
+let savedCases;
+const loadSavedCases = async () => (savedCases ??= await Promise.all(SAVED_CASES.map(async (u) => (await fetch(u)).json())));
+let fixtures;
+async function loadFixtures() {
+  try { fixtures ??= await (await fetch('demo/case-complaint/metadata-fixtures.json')).json(); } catch { fixtures = {}; }
+  return fixtures;
+}
+function fixtureFor(name, role, fx) {
+  if (fx[name]) return fx[name];
+  const word = role === 'correspondence' ? 'correspondence' : role;
+  const key = Object.keys(fx).find((k) => k.toLowerCase().includes(word));
+  return key ? fx[key] : null;
+}
+const redactionCounts = (docs) => {
+  const out = {};
+  for (const d of docs) for (const f of d.findings ?? []) out[f.type] = (out[f.type] || 0) + 1;
+  return out;
+};
+const sum = (o) => Object.values(o).reduce((a, b) => a + b, 0);
+
+async function handleFiles(list) {
+  const files = [...list];
+  if (!files.length) return;
+  const settings = await getSettings();
+  setPack(settings.orgProfile);
+  refreshFooter();
+  const selection = !fileInfo && $('text').value.trim() ? $('text').value.trim() : '';
+  if (files.length === 1 && !selection) return handleFile(files[0]); // one file on its own: the original flow
+  const id = ++runId;
+  await clearHighlights();
+  renderLoading();
+  announce('Reading the files.');
+  try {
+    const fx = settings.demoMode ? await loadFixtures() : {};
+    const docs = [];
+    for (const f of files) {
+      let r;
+      try { r = await extractFile(f); } catch (err) { throw new FileError(`${f.name}: ${err.message}`); } // text is read here; nothing is sent
+      const { role } = detectRole(r.text);
+      let meta = r.meta;
+      let demoMeta = false;
+      if (isEmptyMeta(meta) && settings.demoMode) {
+        const m = fixtureFor(f.name, role, fx);
+        if (m) { meta = normaliseMeta(m, { pages: r.pages }); demoMeta = true; }
+      }
+      docs.push({ name: f.name, kind: r.kind, size: r.size, text: r.text, pages: r.pages, pageTexts: r.pageTexts, meta, demoMeta, role, fromMail: false });
+    }
+    if (selection) {
+      const guess = detectRole(selection).role;
+      docs.push({ name: 'Open email', kind: 'email', size: selection.length, text: cleanText(selection), pages: null, meta: null, demoMeta: false, role: guess === 'other' ? 'correspondence' : guess, fromMail: true });
+    }
+    for (const d of docs) { const s = scanPii(d.text); d.masked = s.maskedText; d.findings = s.findings; } // masked locally, per document
+    if (id !== runId) return;
+    bundle = { docs, settings, showOriginal: false };
+    renderReview();
+  } catch (err) {
+    if (id === runId) renderError(err instanceof FileError ? err.message : 'These files could not be read.', { file: true });
+  }
+}
+
+function taggedText(text) {
+  return text.split(TOKEN_RE).map((part, i) => (i % 2 ? h('span', { class: 'tag' }, part) : part));
+}
+
+const reviewSignals = (d) => (d.kind === 'email' || d.notRead ? [] : provenanceSignals({ meta: d.meta, role: d.role, text: d.text, fromMail: Boolean(d.fromMail) }).filter((s) => s.severity === 'check'));
+
+// One row per file. Run AI is in a bar that stays at the bottom of the panel.
+function renderReview() {
+  setInputVisible(false);
+  refreshFooter();
+  const b = bundle;
+  b.docs = uniqueFiles(b.docs);
+  const demo = b.settings.demoMode;
+  const counts = redactionCounts(b.docs);
+  const total = sum(counts);
+  const gate = !demo && activePack().forbidsExternalAi && total > 0;
+  const files = fileSummary(b.docs);
+  const perType = Object.entries(counts).map(([t, n]) => `${n} ${PII_WORDS[t] || t}`).join(', ');
+
+  const rows = h('ul', { class: 'files' }, b.docs.map((d, i) => (d.notRead
+    ? h('li', { class: 'file-row notread', title: d.reason, ondragover: (e) => e.preventDefault(), ondrop: (e) => { e.preventDefault(); e.stopPropagation(); fillSlot(i, e.dataTransfer.files[0]); } },
+      h('span', { class: 'role-chip notread-chip' }, 'Not read'), h('span', { class: 'fname' }, d.name),
+      h('button', { class: 'textlink', type: 'button', onclick: () => { slotIndex = i; $('slot-input').click(); } }, 'Drop file'))
+    : h('li', { class: 'file-row' },
+      h('span', { class: 'role-chip' }, ROLE_LABELS[d.role]), h('span', { class: 'fname' }, d.name),
+      d.role === 'invoice' && reviewSignals(d).length ? h('span', { class: 'doc-chip flag' }, 'Provenance: check') : null, // one chip, on the invoice row
+      h('span', { class: 'small muted status' }, 'Read')))));
+
+  const box = h('div', { class: 'seebox', tabindex: '0', role: 'region', 'aria-label': 'Text the AI will see, read-only' },
+    b.docs.filter((d) => !d.notRead).map((d) => h('div', { class: 'seedoc' }, h('h4', {}, d.name), h('p', {}, b.showOriginal ? d.text : taggedText(d.masked)))));
+  const see = h('details', { class: 'see', ontoggle: (e) => { b.seeOpen = e.target.open; } },
+    h('summary', {}, 'Show what the AI will see'),
+    h('button', { class: 'textlink', type: 'button', onclick: () => { b.showOriginal = !b.showOriginal; renderReview(); } }, b.showOriginal ? 'Show redacted' : 'Show original'),
+    box);
+  if (b.seeOpen) see.open = true;
+
+  show(h('section', { class: 'review' },
+    h('h2', {}, 'Review before AI'),
+    rows,
+    h('p', { class: 'review-summary' }, files.text),
+    h('p', { class: 'review-summary' }, total ? `${plural(total, 'item', 'items')} masked locally` : 'No personal details found to mask'),
+    total ? h('p', { class: 'small muted' }, perType) : null,
+    see,
+    h('p', { class: gate ? 'gate' : 'small muted', role: gate ? 'alert' : null }, gate
+      ? 'Personal information found. Names may remain in the text sent for analysis. This demo uses fictional data; production would use an approved internal model.'
+      : 'Names are not masked locally. Demo data only.'),
+    h('p', { class: 'small muted' }, demo ? 'Demo mode: no call is made.' : 'One AI call with the masked text shown above.'),
+    h('div', { class: 'bar' },
+      h('button', { class: 'btn btn-primary', type: 'button', onclick: () => runCase(gate) }, 'Run AI'),
+      h('button', { class: 'textlink', type: 'button', onclick: () => { bundle = null; renderEmpty(); } }, 'Cancel')),
+  ));
+  announce('Review before AI. Nothing is sent until you choose Run AI.');
+}
+
+const STEPS = (n) => [`Reading ${n} documents`, 'Checking the amounts', 'Checking against the policy', 'Preparing next steps'];
+function renderProgress(done, n) {
+  show(h('section', { class: 'progress', 'aria-busy': 'true' },
+    h('h2', {}, 'Running AI'),
+    h('ol', {}, STEPS(n).map((label, i) => h('li', { class: i < done ? 'done' : i === done ? 'now' : 'wait' }, i < done ? '✓ ' : i === done ? '… ' : '', label)))));
+  announce(STEPS(n)[Math.min(done, 3)]);
+}
+
+const emailDate = (docs) => {
+  const m = /(?:Date|Sent):\s*(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/.exec(docs.map((d) => d.text).join(' '));
+  const mi = m ? ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'].indexOf(m[2].toLowerCase().slice(0, 3)) : -1;
+  return m && mi >= 0 ? `${m[3]}-${String(mi + 1).padStart(2, '0')}-${m[1].padStart(2, '0')}` : new Date().toISOString().slice(0, 10);
+};
+
+async function runCase(gateShown) {
+  const b = bundle;
+  const id = ++runId;
+  const readDocs = b.docs.filter((d) => !d.notRead); // a file that could not be read takes no part
+  const n = readDocs.length;
+  try {
+    let result = null;
+    let mode = 'live';
+    if (b.settings.demoMode) {
+      const saved = findSavedCase(readDocs.map((d) => d.text).join(' '), await loadSavedCases());
+      if (saved) {
+        const problems = verifyCase(saved); // sums, GST and due dates are recomputed here; a mismatch stops the demo
+        if (problems.length) throw new Error(`The saved result failed its own checks: ${problems[0]}`);
+        renderProgress(0, n);
+        result = saved;
+        mode = 'demo';
+      }
+    }
+    if (!result) {
+      if (!b.settings.apiKey) throw new Error(b.settings.demoMode ? 'Demo mode has no saved result for these files, and no API key is set for a live check.' : 'No API key is set.');
+      renderProgress(1, n);
+      const { assessCase } = await import('./case-live.js');
+      const docTexts = Object.fromEntries(readDocs.map((d) => [d.role, d.text]));
+      result = await assessCase(readDocs.map((d) => ({ name: d.name, role: d.role, maskedText: d.masked })), b.settings, { emailISO: b.emailISO ?? emailDate(readDocs), docTexts });
+    }
+    if (id !== runId) return;
+    const noAgreement = !hasAgreement(readDocs);
+    if (noAgreement) result = withoutAgreement(result); // no agreed-side quote may come from the saved text
+    setPack(result.pack);
+    // Provenance comes from file metadata only. The email body has none, so it never raises a signal.
+    const prov = readDocs.map((d) => {
+      const signals = d.kind === 'email' ? [] : provenanceSignals({ meta: d.meta, role: d.role, text: d.text, fromMail: Boolean(d.fromMail) });
+      return { name: d.name, role: d.role, signals, summary: d.kind === 'email' ? 'No file details' : provenanceSummary(signals), demo: Boolean(d.demoMeta) };
+    });
+    const view = { case: true, result, docs: readDocs, prov, noAgreement, mode, gate: { shown: gateShown, decision: gateShown ? 'continue' : 'not shown' }, counts: redactionCounts(readDocs), note: `${mode === 'demo' ? 'Demo mode: a saved result. ' : ''}${plural(sum(redactionCounts(readDocs)), 'item', 'items')} masked locally.` };
+    view.findings = await findingsFor(result);
+    view.evidence = await evidenceFor(result, readDocs); // prepared quotes, each checked against the files that were read
+    view.reading = { sources: readingSources(readDocs, result, b.emailInfo), concerns: result.checks.filter((c) => c.status !== 'ok').length };
+    current = { view, report: null, decision: null, entryId: await recordCaseHistory(view), openKey: null };
+    await playReading(view, mode === 'demo'); // what was read, then the recommendations
+  } catch (err) {
+    if (id === runId) renderError(err.message || String(err), { file: true });
+  }
+}
+
+async function findingsFor(result) {
+  try {
+    const map = await (await fetch('demo/case-complaint/demo-findings-map.json')).json();
+    if (map.caseId === result.id) return map; // prepared wording, used exactly
+  } catch { /* no prepared map: derive one from the result */ }
+  return deriveFindings(result);
+}
+
+// demo-evidence.json belongs to the saved complaint case. Every quote is checked here, against the redacted text of the
+// files that were read; a quote that is not found is never shown as evidence.
+async function evidenceFor(result, docs) {
+  try {
+    const raw = await (await fetch('demo/case-complaint/demo-evidence.json')).json();
+    if (raw.caseId !== result.id) return null;
+    return { raw, resolved: resolveEvidence(raw, docs) };
+  } catch { return null; }
+}
+
+async function recordCaseHistory(view) {
+  const history = await load('history', []);
+  const r = view.result;
+  const ids = [...new Set([...r.stamp.basis, ...r.case.nextSteps.flatMap((s) => s.basis), ...r.case.outcomeDue.basis])];
+  const basis = citationsFor(ids).flatMap((c) => passages(c).map((p) => ({ id: c.id, document: p.document, version: p.version })));
+  // Audit record: roles, steps, basis ids, redaction counts, gate decision, Run AI, mode. Never any text.
+  const entry = { id: Date.now(), ts: Date.now(), action: r.overall, label: r.stamp.title, basis, decision: null,
+    case: { roles: view.docs.map((d) => d.role), steps: r.case.nextSteps.map((s) => ({ rank: s.rank, basis: s.basis })), redaction: view.counts, gate: view.gate, runAi: true, mode: view.mode, pack: r.pack, evidence: view.evidence ? auditCounts(view.evidence.resolved) : null } }; // evidence: step ids and counts only, never quote text
+  await save('history', [entry, ...history].slice(0, 20));
+  return entry.id;
+}
+
+// ---------- Gmail: "Use this email" (only for the demo account named in settings) ----------
+const GMAIL_OFF = 'Gmail reading is off for this account. Use a demo account.';
+let slotIndex = -1;
+
+function gmailBox() {
+  return h('div', { class: 'gmail-box' },
+    h('p', {}, 'A Gmail message is open?'),
+    h('button', { class: 'btn btn-primary', type: 'button', onclick: useThisEmail }, 'Use this email'),
+    h('p', { class: 'small muted', id: 'gmail-status', role: 'status' }, 'Nothing is read until you press the button.'));
+}
+const gmailStatus = (msg) => { const el = $('gmail-status'); if (el) el.textContent = msg; announce(msg); };
+
+const inTab = async (func, args = []) => (await ext.scripting.executeScript({ target: { tabId: pageTabId }, func, args }))[0]?.result;
+
+async function fetchAttachment(url) {
+  const res = await ext.runtime.sendMessage({ type: 'tl-fetch', url }); // the service worker downloads it with the browser's own session
+  if (!res?.ok) throw new Error(res?.error || `HTTP ${res?.status ?? 'unknown'}`);
+  return { bytes: Uint8Array.from(atob(res.base64), (c) => c.charCodeAt(0)), type: res.type };
+}
+
+// Selected text, then the drop zone, when the Gmail reader cannot be used. Always says which path was taken.
+async function gmailFallback(reason) {
+  let selected = '';
+  try { selected = (await inTab(() => getSelection().toString())) ?? ''; } catch { /* page not reachable */ }
+  if (selected.trim()) {
+    $('text').value = selected.trim(); updateInputMeta(); fileInfo = null;
+    renderEmpty();
+    $('view').append(h('p', { class: 'small muted', style: 'padding-inline:16px' }, `${reason} Using the text you selected on the page.`));
+    announce(`${reason} Using the text you selected.`);
+  } else {
+    gmailStatus(`${reason} Select the text on the page, or drop the downloaded attachments below.`);
+  }
+}
+
+async function useThisEmail() {
+  const settings = await getSettings();
+  if (!settings.gmailEnabled || !settings.gmailAddress) return gmailStatus(GMAIL_OFF); // reads nothing
+  setPack(settings.orgProfile);
+  gmailStatus('Reading the open message…');
+  let r;
+  try {
+    await ext.scripting.executeScript({ target: { tabId: pageTabId }, files: ['gmail-reader.js'] });
+    r = await inTab((expected) => globalThis.__tlGmail.read({ expected }), [settings.gmailAddress]);
+  } catch (err) { return gmailFallback('Gmail could not be reached.'); }
+  if (!r || r.reason === 'account-mismatch' || r.reason === 'no-expected-address') return gmailStatus(GMAIL_OFF);
+  if (!r.ok) return gmailFallback('No open message was found.');
+  console.debug('[TrustLens Gmail]', r.debug.join(' | '));
+
+  const docs = [];
+  const emailText = cleanText(`${r.subject}\n${r.body}`);
+  docs.push({ name: 'Open email', kind: 'email', size: emailText.length, text: emailText, pages: null, meta: null, demoMeta: false, role: 'email', fromMail: true });
+  for (const c of r.chips) {
+    const notRead = (reason) => docs.push({ name: c.name, kind: 'pdf', size: 0, text: '', masked: '', findings: [], role: 'other', notRead: true, reason });
+    if (!c.url) { notRead('No download link was found'); continue; }
+    try {
+      gmailStatus(`Reading ${c.name}…`);
+      const { bytes, type } = await fetchAttachment(c.url);
+      const out = await extractFile(new File([bytes], c.name, { type }));
+      docs.push({ name: c.name, kind: out.kind, size: out.size, text: out.text, pages: out.pages, pageTexts: out.pageTexts, meta: out.meta, demoMeta: false, role: detectRole(out.text).role, fromMail: true });
+    } catch (err) { notRead(err instanceof FileError ? err.message : `The download failed (${err.message})`); }
+  }
+  const rows = uniqueFiles(docs); // one row per file; a file that was read is never also "Not read"
+  for (const d of rows) if (!d.notRead) { const s = scanPii(d.text); d.masked = s.maskedText; d.findings = s.findings; }
+  bundle = { docs: rows, settings, showOriginal: false, emailISO: r.date.iso, emailInfo: { subject: r.subject, sender: r.sender.name || r.sender.address, date: r.date.iso } };
+  renderReview();
+}
+
+// A file that could not be read: the person drops the downloaded file onto its row (or chooses it).
+async function fillSlot(i, file) {
+  if (!file || !bundle?.docs[i]?.notRead) return;
+  try {
+    const out = await extractFile(file);
+    const d = { name: file.name, kind: out.kind, size: out.size, text: out.text, pages: out.pages, pageTexts: out.pageTexts, meta: out.meta, demoMeta: false, role: detectRole(out.text).role, fromMail: false };
+    const s = scanPii(d.text); d.masked = s.maskedText; d.findings = s.findings;
+    bundle.docs[i] = d;
+    bundle.docs = uniqueFiles(bundle.docs);
+    renderReview();
+  } catch (err) {
+    bundle.docs[i].reason = err instanceof FileError ? err.message : 'That file could not be read';
+    renderReview();
+  }
+}
+$('slot-input').addEventListener('change', (e) => { const f = e.target.files[0]; e.target.value = ''; fillSlot(slotIndex, f); });
+
+// ---------- "What was read": the email, each file and what was found in it, then the recommendation ----------
+function readingSources(docs, result, emailInfo) {
+  const byRole = Object.fromEntries(result.case.documents.map((d) => [d.role, d]));
+  return docs.map((d) => {
+    if (d.kind === 'email') {
+      const facts = emailInfo ? [`Subject: ${emailInfo.subject}`, `From ${emailInfo.sender || 'unknown sender'}, sent ${formatDay(emailInfo.date)}`] : ['Text of the open email'];
+      return { label: ROLE_LABELS.email, name: d.name, facts, pii: [], pages: null };
+    }
+    if (d.role === 'policy') return { label: ROLE_LABELS.policy, name: d.name, facts: ['The organisation’s own procedure. Used for the clause quotes.'], pii: [], pages: d.pages };
+    const saved = byRole[d.role];
+    return { label: ROLE_LABELS[d.role], name: d.name, facts: saved?.keyFacts ?? [], pii: saved?.pii ?? [], pages: d.pages };
+  });
+}
+
+function renderReadingState(view, upTo, steps, done) {
+  const { sources, concerns } = view.reading;
+  const r = view.result;
+  const stepLabels = ['Checking the amounts', 'Checking against the policy', 'Preparing next steps'];
+  refreshFooter();
+  show(h('section', { class: 'reading' },
+    h('h2', {}, done ? 'What was read' : 'Reading the case'),
+    h('ul', { class: 'read-list' }, sources.map((s, i) => {
+      const state = i < upTo ? 'done' : i === upTo ? 'now' : 'wait';
+      return h('li', { class: state },
+        h('p', { class: 'read-head' }, h('span', { class: 'mark' }, state === 'done' ? '✓' : state === 'now' ? '…' : ''), h('span', { class: 'role-chip' }, s.label), h('b', { class: 'fname' }, s.name), s.pages ? h('span', { class: 'small muted' }, `${s.pages} ${s.pages === 1 ? 'page' : 'pages'}`) : null),
+        state === 'done' ? h('ul', { class: 'facts-list' }, s.facts.map((f) => h('li', {}, f)), s.pii.length ? h('li', { class: 'pii-line' }, `Personal details found and masked: ${s.pii.join(', ')}`) : null) : null);
+    })),
+    h('ol', { class: 'read-steps' }, stepLabels.map((l, i) => h('li', { class: i < steps ? 'done' : 'wait' }, h('span', { class: 'mark' }, i < steps ? '✓' : ''), l))),
+    done ? h('div', { class: 'read-done' },
+      h('p', { class: 'small muted' }, `Read ${plural(sources.length, 'source', 'sources')}. ${concerns ? `${plural(concerns, 'area needs', 'areas need')} attention.` : 'No areas need attention.'}`),
+      h('p', { class: 'recommend' }, h('span', { class: 'small muted' }, 'Recommended: '), r.stamp.title),
+      h('p', { class: 'small' }, `${r.stamp.owner}, due ${formatDay(r.stamp.due)}`),
+      h('button', { class: 'btn btn-primary', type: 'button', onclick: () => renderCaseReport(view) }, 'Show recommendations')) : null));
+}
+
+async function playReading(view, animate) {
+  const n = view.reading.sources.length;
+  if (animate) {
+    for (let i = 0; i < n; i++) { renderReadingState(view, i, 0, false); announce(`Reading ${view.reading.sources[i].name}`); await sleep(450); }
+    for (let k = 1; k <= 3; k++) { renderReadingState(view, n, k, false); await sleep(400); }
+  }
+  renderReadingState(view, n, 3, true);
+  announce('Finished reading. Recommendations are ready.');
+}
+
+// ----- case result. Level 1: the finding and the step it causes. Level 2: evidence opens in place, one at a time. -----
+function policyChip(id) {
+  const cite = citationsFor([id])[0];
+  if (!cite) return null;
+  const p = passages(cite)[0];
+  const copy = h('button', { class: 'btn', type: 'button', onclick: () => copyCitation({ label: current?.view?.result?.stamp?.title ?? 'Recommended action', basis: [id] }) }, 'Copy citation');
+  const chip = h('button', { class: 'policy-link', type: 'button', onclick: () => openSheet('Policy clause', [cite], chip, [copy]) }, `${id} · ${p.section.replace(/^\d+\.\s*[^,]*,\s*/, 's')}`);
+  return chip;
+}
+const chipRow = (ids) => h('span', { class: 'chips-inline' }, ids.map(policyChip).filter(Boolean));
+
+function fileDetails(d, p, short = false) {
+  const m = d.meta;
+  const rows = isEmptyMeta(m)
+    ? [['File details', 'None found in the file']]
+    : [['Created with', m.creator || m.producer || 'unknown'], ['Created', fmtDate(m.created)], ['Modified', fmtDate(m.modified)], ['Author', m.author || 'none']];
+  const signals = p.signals;
+  return h('div', { class: 'filedetails' },
+    h('p', { class: 'fd-title' }, `${d.name}`, d.demoMeta ? h('b', { class: 'demo-meta' }, ' Demo metadata') : null),
+    h('dl', { class: 'facts' }, rows.flatMap(([k, v]) => [h('dt', {}, k), h('dd', {}, v)])),
+    signals.length
+      ? h('ul', { class: 'signals' }, signals.map((s) => h('li', {}, h('b', {}, `${s.id} ${s.label}`), `: ${s.reason}`)))
+      : h('p', { class: 'small' }, CLEAN),
+    h('p', { class: 'small muted' }, short ? CLUE : NOTE));
+}
+
+// ----- evidence: quotes from the files, each verified against the file that was read -----
+const evItems = (view, id) => view.evidence?.resolved.steps[id] ?? null;
+
+function quoteBlock(view, item) {
+  const head = h('p', { class: 'ev-head' }, h('span', { class: 'role-chip' }, item.label), h('span', { class: 'small muted' }, item.shows));
+  if (item.kind === 'metadata') {
+    const i = view.docs.findIndex((d) => matchesDoc(item.doc, d));
+    return item.status === 'verified' && i >= 0 ? h('div', { class: 'ev-item ev-meta' }, head, fileDetails(view.docs[i], view.prov[i], true)) : h('div', { class: 'ev-item' }, head, h('p', { class: 'small muted' }, NOT_READ));
+  }
+  if (item.status === 'verified') {
+    return h('div', { class: 'ev-item', 'data-status': 'verified' }, head, h('blockquote', { class: 'quote' }, item.text), h('p', { class: 'ev-found small' }, h('span', { 'aria-hidden': 'true' }, '✓ '), foundLine(item)));
+  }
+  return h('div', { class: 'ev-item', 'data-status': item.status }, head, h('p', { class: 'small muted' }, item.status === 'notread' ? NOT_READ : NOT_FOUND)); // never the quote
+}
+const matchesDoc = (doc, d) => ({ invoice: d.role === 'invoice', agreement: d.role === 'agreement', emails: d.role === 'correspondence' && d.kind !== 'email', email: d.kind === 'email' }[doc] ?? false);
+
+// The details of the invoice file are shown only when signals fired on it.
+const visibleItems = (view, items) => items.filter((i) => i.kind !== 'metadata' || view.prov.some((p) => p.role === i.doc && checkSignals(p).length));
+
+// Agreed vs billed, side by side: the contradiction at a glance. Quotes come from the evidence list, not from the model.
+function sideBySide(view, items, withAmounts) {
+  const agreed = items.find((i) => i.doc === 'agreement'), billed = items.find((i) => i.doc === 'invoice');
+  if (!agreed || !billed) return [];
+  const col = (title, item) => h('div', { class: 'sbs-col' }, h('span', { class: 'role-chip' }, title),
+    item.status === 'verified' ? h('blockquote', { class: 'quote' }, item.text) : h('p', { class: 'small muted' }, item.status === 'notread' ? NOT_READ : NOT_FOUND),
+    item.status === 'verified' ? h('p', { class: 'ev-found small' }, h('span', { 'aria-hidden': 'true' }, '✓ '), foundLine(item)) : null);
+  const tot = view.result.case.reconciliation.find((x) => x.item === 'Total (incl GST)');
+  return [
+    h('p', { class: 'ev-label' }, 'Agreed vs billed'),
+    h('div', { class: 'sbs' }, col('Agreement', agreed), col('Invoice', billed)),
+    withAmounts && tot ? h('p', { class: 'sbs-amounts' }, `Agreed ${money(tot.agreed)} · Billed ${money(tot.billed)} · Difference ${signedMoney(tot.difference)}`) : null,
+  ];
+}
+
+// The rule for a step: the verbatim clause for its first basis id (attached by code from the policy file).
+function ruleBlock(view, basis, label) {
+  const cite = citationsFor(basis.slice(0, 1))[0];
+  if (!cite) return null;
+  const p = passages(cite)[0];
+  const flash = h('span', { class: 'copy-status', role: 'status' });
+  return h('div', { class: 'ev-rule' },
+    h('p', { class: 'ev-label' }, 'Rule'),
+    h('blockquote', { class: 'quote' }, p.quote),
+    h('p', { class: 'small muted' }, `${basis[0]} · ${p.document} v${p.version}, s${p.section}`),
+    h('div', { class: 'ev-actions' }, h('button', { class: 'btn', type: 'button', onclick: () => copyCitation({ label, basis: basis.slice(0, 1) }, flash) }, 'Copy citation'), flash),
+    basis.length > 1 ? chipRow(basis.slice(1)) : null);
+}
+
+// Plain text for "Copy evidence": the action, the verified quotes with their file labels, and the rule. Redacted.
+function copyEvidenceButton(view, step, items) {
+  const flash = h('span', { class: 'copy-status', role: 'status' });
+  const cite = citationsFor(step.basis.slice(0, 1))[0];
+  const btn = h('button', { class: 'btn', type: 'button', onclick: () => copyText(evidenceText({
+    action: step.action, owner: step.owner, due: formatDay(step.due), because: step.because ? `${step.because.check}: ${step.because.text}` : '', items,
+    rule: cite ? `${step.basis[0]}: "${passages(cite)[0].quote}" (${passages(cite)[0].document} v${passages(cite)[0].version}, s${passages(cite)[0].section})` : '',
+    date: new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }) }), flash) }, 'Copy evidence');
+  return h('span', { class: 'ev-actions' }, btn, flash);
+}
+
+// Evidence for one step. `full` (Level 2) lists everything; otherwise the first block is shown and the rest opens in place.
+function stepEvidence(view, id, { full = false, amounts = false } = {}) {
+  const all = evItems(view, id);
+  if (!all) return [];
+  const items = visibleItems(view, all);
+  const inline = [], more = [];
+  if (id === 'approve') {
+    const a = items.find((i) => i.doc === 'agreement'), b = items.find((i) => i.doc === 'invoice');
+    const sbs = sideBySide(view, items, amounts);
+    inline.push(...sbs);
+    (full ? inline : more).push(...(sbs.length ? items.filter((i) => i !== a && i !== b) : items).map((i) => quoteBlock(view, i)));
+  } else {
+    items.forEach((i, n) => (n === 0 || full ? inline : more).push(quoteBlock(view, i)));
+  }
+  const box = h('div', { class: 'ev-more', hidden: true }, more);
+  const link = more.length ? h('button', { class: 'textlink', type: 'button', 'aria-expanded': 'false', onclick: () => { box.hidden = !box.hidden; link.setAttribute('aria-expanded', String(!box.hidden)); link.textContent = box.hidden ? `Show all evidence (${items.length})` : 'Show less evidence'; } }, `Show all evidence (${items.length})`) : null;
+  return [h('div', { class: 'ev-list', 'data-step': id }, h('p', { class: 'ev-label' }, 'Evidence'), ...inline, box, link)];
+}
+
+const claimWord = (s) => (/^supported/.test(s) ? s[0].toUpperCase() + s.slice(1) : 'Not shown in the documents');
+
+function accuracyEvidence(view) {
+  const r = view.result;
+  const fm = view.findings;
+  const all = r.case.reconciliation;
+  let expanded = false;
+  const tbody = h('tbody');
+  const fill = () => {
+    tbody.replaceChildren(...all.filter((x) => expanded || fm.accuracyDefaultRows.includes(x.item)).flatMap((x) => [
+      h('tr', {}, h('td', {}, x.item), h('td', { class: 'num-col' }, money(x.agreed)), h('td', { class: 'num-col' }, money(x.billed)), h('td', { class: 'num-col diff' }, signedMoney(x.difference))),
+      h('tr', { class: 'qrow' }, h('td', { colspan: '4' }, x.agreedNote ? x.agreedNote : x.quoteAgreed ? `“${x.quoteAgreed}”` : '')),
+    ]));
+  };
+  fill();
+  const moreBtn = h('button', { class: 'textlink', type: 'button', onclick: () => { expanded = true; fill(); moreBtn.remove(); } }, fm.accuracyMoreLabel);
+  const claims = h('ul', { class: 'claims', hidden: true }, r.case.claims.map((c) => h('li', {}, h('span', {}, c.claim), h('b', { class: 'cl-status' }, claimWord(c.status)))));
+  const claimsBtn = h('button', { class: 'textlink', type: 'button', 'aria-expanded': 'false', onclick: () => { claims.hidden = !claims.hidden; claimsBtn.setAttribute('aria-expanded', String(!claims.hidden)); claimsBtn.textContent = claims.hidden ? 'See claims' : 'Hide claims'; } }, 'See claims');
+  return [
+    view.noAgreement ? h('p', { class: 'small' }, NO_AGREEMENT_NOTE) : null,
+    h('table', { class: 'recon' }, h('thead', {}, h('tr', {}, ['Item', 'Agreed', 'Billed', 'Difference'].map((t, i) => h('th', { class: i ? 'num-col' : '' }, t)))), tbody),
+    moreBtn,
+    h('p', { class: 'small' }, fm.claimsSummary, ' ', claimsBtn),
+    claims,
+    ...stepEvidence(view, 'approve', { full: true }), // the quotes behind the table, then the rule
+    ...(evItems(view, 'approve') ? [ruleBlock(view, fm.stamp.basis, fm.stamp.action)] : []),
+  ];
+}
+
+const stepById = (view, id) => view.findings.alsoNeeded.find((s) => s.id === id);
+const privacyStep = (view) => stepById(view, 'privacy');
+
+function governanceEvidence(view) {
+  const g = view.result.checks.find((c) => c.key === 'governance');
+  return [
+    g.found?.length ? h('div', {}, h('p', { class: 'ev-label' }, 'Found'), h('ul', { class: 'chips' }, g.found.map((f) => h('li', { class: 'chip-plain' }, f)))) : null,
+    ...stepEvidence(view, 'privacy', { full: true }),
+    ...(evItems(view, 'privacy') ? [ruleBlock(view, privacyStep(view).basis, privacyStep(view).action)] : []),
+    h('div', {}, h('p', { class: 'ev-label' }, 'Clauses'), chipRow(g.basis ?? [])),
+    g.manage?.length ? h('div', {}, h('p', { class: 'ev-label' }, 'How to manage'), g.manage.map((m) => h('p', { class: 'manage' }, h('b', {}, `${m.label}: `), m.text, ' ', chipRow(m.basis)))) : null,
+  ];
+}
+
+function misleadingEvidence(view) {
+  const items = view.evidence ? levelTwoItems('misleading', view.evidence.resolved, view.evidence.raw) : null;
+  if (items) {
+    const step = stepById(view, 'refer');
+    return [h('div', { class: 'ev-list', 'data-step': 'refer' }, h('p', { class: 'ev-label' }, 'Evidence'), ...items.map((i) => quoteBlock(view, i))), ruleBlock(view, step.basis, step.action)];
+  }
+  const c = view.result.checks.find((x) => x.key === 'misleading');
+  return (c.quotes ?? []).map((q) => h('div', {}, h('p', { class: 'ev-label' }, ROLE_LABELS[q.doc] ?? q.doc), q.note ? h('p', { class: 'small muted' }, q.note) : h('blockquote', { class: 'quote' }, q.text)));
+}
+
+function fileEvidence(view, i, withHedge = false) {
+  const d = view.docs[i];
+  const p = view.prov[i];
+  return [fileDetails(d, p), withHedge ? h('p', { class: 'small muted' }, 'A clue, not proof. Signals, not proof. A person makes the final call.') : null];
+}
+
+const EVIDENCE = { accuracy: accuracyEvidence, governance: governanceEvidence, misleading: misleadingEvidence };
+
+// Only one evidence panel is open at a time. It opens inside the element that asked for it.
+function toggleEvidence(key, host, button, build) {
+  const open = current.evidence;
+  if (open) { open.el.remove(); open.button?.setAttribute('aria-expanded', 'false'); current.evidence = null; if (open.key === key) return; }
+  const el = h('div', { class: 'evidence', role: 'region', 'data-evidence': key }, build());
+  host.append(el);
+  button?.setAttribute('aria-expanded', 'true');
+  current.evidence = { key, el, button };
+}
+
+function becauseButton(key, host, build, ...kids) {
+  const btn = h('button', { class: 'because', type: 'button', 'aria-expanded': 'false', onclick: () => toggleEvidence(key, host, btn, build) }, ...kids);
+  return btn;
+}
+
+function renderCaseReport(view) {
+  setInputVisible(false);
+  const r = view.result;
+  const fm = view.findings;
+  const invoiceIdx = view.prov.findIndex((p) => p.role === 'invoice');
+  const flaggedIdx = view.prov.findIndex((p) => checkSignals(p).length);
+  const stamp = fm.stamp;
+  const decision = { label: stamp.action, basis: stamp.basis, action: r.overall };
+  current.evidence = null;
+
+  // document chips; a chip opens that file's details
+  const chipHost = h('div', { class: 'doc-chips ev-host' });
+  const chipEl = (label, i, flag) => { const c = h('button', { class: `doc-chip${flag ? ' flag' : ''}`, type: 'button', 'aria-expanded': 'false', onclick: () => toggleEvidence(`chip:${i}`, chipHost, c, () => fileEvidence(view, i, flag)) }, label); return c; };
+  chipHost.append(...view.docs.map((d, i) => chipEl(ROLE_LABELS[d.role], i, false)), ...(flaggedIdx >= 0 ? [chipEl('Provenance: check', flaggedIdx, true)] : []));
+
+  // the stamp: the finding, then the step
+  const area = h('span', { id: 'decision', style: 'display:contents' });
+  const card = h('section', { class: 'stamp-card ev-host', 'aria-labelledby': 'stamp-action' });
+  const because = h('button', { class: 'because stamp-because', type: 'button', 'aria-expanded': 'false', onclick: () => toggleEvidence('stamp', card, because, () => EVIDENCE[stamp.evidence](view)) },
+    h('span', { class: 'because-label' }, h('span', { class: 'dot', 'aria-hidden': 'true' }), becauseLabel(stamp.because)),
+    h('span', { class: 'because-text' }, stamp.because.text));
+  const menu = renderMenu(decision, [['Follow advice', () => setDecision({ kind: 'followed' })], ['Override', () => renderDecision($('decision'), true)]]);
+  card.append(because,
+    h('h2', { class: 'stamp-action', id: 'stamp-action' }, stamp.action),
+    h('p', { class: 'stamp-owner' }, `${stamp.owner} · due ${formatDay(stamp.due)}`),
+    h('div', { class: 'stamp-actions' }, h('button', { class: 'btn btn-primary', type: 'button', onclick: () => renderPath(view) }, 'See the path'), area, h('span', { id: 'copy-flash', class: 'copy-status', role: 'status' }), menu));
+  renderDecision(area);
+
+  // also needed: each step with the finding that causes it
+  const also = h('section', { class: 'also' }, h('h3', {}, 'Also needed'),
+    h('ul', {}, fm.alsoNeeded.map((s) => {
+      const li = h('li', { class: 'also-row ev-host' });
+      const line = `Because ${s.because.check}: ${s.because.text}`;
+      li.append(
+        h('div', { class: 'also-main' },
+          h('p', { class: 'also-action' }, s.action),
+          s.evidence ? becauseButton(`row:${s.id}`, li, () => EVIDENCE[s.evidence](view), line) : h('p', { class: 'because plain' }, line),
+          h('p', { class: 'also-owner' }, s.owner)),
+        h('p', { class: 'also-due' }, formatDay(s.due)));
+      return li;
+    })));
+
+  show(h('div', { class: 'report case' }, chipHost, view.noAgreement ? h('p', { class: 'agreement-note small' }, NO_AGREEMENT_NOTE) : null, card, also, h('p', { class: 'collapsed-checks' }, fm.collapsedChecks)));
+  refreshFooter(view.mode === 'demo' ? 'Demo mode: saved result' : 'Live result', true);
+  announce(`Result ready. ${stamp.action}.`);
+}
+
+// The path: every step by deadline. Each step: the finding (Because), the evidence from the files, the rule, who and when.
+function renderPath(view) {
+  const r = view.result;
+  const fm = view.findings;
+  const invoiceSignals = view.prov.some((p) => p.role === 'invoice' && checkSignals(p).length);
+  const steps = [{ ...fm.stamp, id: 'approve', because: fm.stamp.because, primary: true }, ...fm.alsoNeeded, ...(invoiceSignals ? fm.pathOnly : [])]
+    .sort((a, b) => a.due.localeCompare(b.due));
+  const firstDue = steps[0].due;
+  const timing = view.evidence?.resolved.callouts.tuesday;
+  const callout = timing ? h('li', { class: 'path-callout' },
+    h('p', { class: 'ev-label' }, `Timing for ${formatDay(firstDue)}`),
+    ...timing.map((i) => quoteBlock(view, i))) : null;
+  const items = steps.flatMap((s, n) => [
+    n === 0 ? callout : null,
+    h('li', { class: s.primary ? 'primary' : '', 'data-step': s.id },
+      h('p', { class: 'path-due' }, formatDay(s.due)),
+      h('p', { class: 'path-action' }, s.action),
+      h('p', { class: 'path-owner' }, s.owner),
+      s.because ? h('p', { class: 'path-because' }, `Because ${s.because.check}: ${s.because.text}`) : null,
+      ...stepEvidence(view, s.id, { amounts: true }),
+      view.evidence ? ruleBlock(view, s.basis, s.action) : chipRow(s.basis),
+      view.evidence ? copyEvidenceButton(view, s, visibleItems(view, evItems(view, s.id) ?? [])) : null),
+  ]).filter(Boolean);
+  show(h('section', { class: 'path' },
+    h('h2', {}, 'Path to resolution'),
+    h('ol', { class: 'path-list' }, items),
+    h('p', { class: 'path-outcome' }, `Written outcome due ${formatDay(r.case.outcomeDue.date)} `, chipRow(r.case.outcomeDue.basis)),
+    h('div', { class: 'actions' }, h('button', { class: 'btn', type: 'button', onclick: () => renderCaseReport(view) }, 'Back to result'))));
+  announce('Path to resolution.');
+}
+
 // ---------- files ----------
 const chooseFile = () => $('file-input').click();
 
@@ -568,14 +1183,14 @@ async function handleFile(file) {
   }
 }
 
-$('file-input').addEventListener('change', (e) => { const f = e.target.files[0]; e.target.value = ''; handleFile(f); });
+$('file-input').addEventListener('change', (e) => { const list = [...e.target.files]; e.target.value = ''; handleFiles(list); });
 document.addEventListener('dragover', (e) => { if (e.dataTransfer?.types?.includes('Files')) { e.preventDefault(); document.body.classList.add('dragging'); } });
 document.addEventListener('dragleave', (e) => { if (!e.relatedTarget) document.body.classList.remove('dragging'); });
 document.addEventListener('drop', (e) => {
   if (!e.dataTransfer?.files?.length) return;
   e.preventDefault();
   document.body.classList.remove('dragging');
-  handleFile(e.dataTransfer.files[0]);
+  handleFiles([...e.dataTransfer.files]);
 });
 
 // ---------- wiring ----------
@@ -590,6 +1205,7 @@ document.addEventListener('keydown', (e) => {
   if (closeSheet()) return;
   const menu = document.querySelector('.menu-wrap .menu');
   if (menu) { document.querySelector('.menu-wrap').closeMenu?.(); return; }
+  if (current?.evidence) { const { el, button } = current.evidence; el.remove(); button?.setAttribute('aria-expanded', 'false'); current.evidence = null; button?.focus(); return; }
   if (current?.openKey) { const key = current.openKey; closeRow(); $('view').querySelector(`#head-${key}`)?.focus(); return; }
   clearHighlights();
 });
@@ -597,6 +1213,7 @@ document.addEventListener('keydown', (e) => {
 function acceptPending(p) {
   if (!p) return;
   pageTabId = p.tabId ?? null;
+  pageUrl = p.url ?? '';
   fileInfo = null;
   $('text').value = p.text || '';
   updateInputMeta();

@@ -20,6 +20,12 @@ const cases = [
   ['card 13 digit', 'Visa 4222222222222', ['card']],
   ['all four together', 'jane@example.com, 0412 345 678, TFN 123 456 782, card 4111 1111 1111 1111', ['email', 'phone', 'tfn', 'card']],
   ['two phones', 'Ring 0412 345 678 or 02 9876 5432', ['phone', 'phone']],
+  ['DOB written out', 'My date of birth is 3 July 1981 thanks', ['dob']],
+  ['DOB with slashes', 'DOB: 03/07/1981', ['dob']],
+  ['born on', 'Elena was born on 3 July 1981.', ['dob']],
+  ['home address with suburb, state and postcode', 'I live at 14 Quarry Lane, Harbourview NSW 2999 now', ['address']],
+  ['address without suburb', 'Send it to 22 Station Road please', ['address']],
+  ['DOB and address together', 'my date of birth is 3 July 1981 and my home address is 14 Quarry Lane, Harbourview NSW 2999.', ['dob', 'address']],
   // false positives: none of these should be masked
   ['date slashes', 'Due 15/03/2024', []],
   ['date ISO', 'Created 2024-03-15 10:30', []],
@@ -30,6 +36,9 @@ const cases = [
   ['money', 'Total $1,234,567.89', []],
   ['version and plain prose', 'Release v1.2.3 fixed 12 bugs', []],
   ['not an email', 'Meet @ 5pm, cost @ $10', []],
+  ['ABN placeholder with zeros is not a TFN', 'ABN 00 000 000 000', []],
+  ['ordinary date, no birth context', 'Invoice date 25 September 2026, due 9/10/2026', []],
+  ['road word without a street number', 'Take the Main Road to the lane', []],
 ];
 
 let failed = 0;

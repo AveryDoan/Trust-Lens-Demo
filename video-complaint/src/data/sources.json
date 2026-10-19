@@ -1,0 +1,9 @@
+{
+  "copied": {
+    "demo-result-complaint.json": true,
+    "demo-findings-map.json": true,
+    "demo-action-plan.json": false,
+    "demo-evidence.json": true,
+    "policies-harbourview.json": true
+  }
+}

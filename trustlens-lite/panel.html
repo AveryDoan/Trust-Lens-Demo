@@ -37,7 +37,8 @@
     </button>
   </header>
 
-  <input type="file" id="file-input" accept=".pdf,.docx,.txt,.md" hidden>
+  <input type="file" id="slot-input" accept=".pdf,.docx,.txt,.md" hidden>
+  <input type="file" id="file-input" accept=".pdf,.docx,.txt,.md" multiple hidden>
   <div id="live" class="sr-only" role="status" aria-live="polite"></div>
 
   <main id="view" tabindex="-1"></main>
@@ -52,8 +53,7 @@
   </section>
 
   <footer class="foot">
-    <p>Signals, not proof. A person makes the final call.</p>
-    <p>Policy basis: RIMPA Global published governance documents</p>
+    <p id="foot-pack">Policy basis: RIMPA Global published governance documents</p>
   </footer>
 
   <script type="module" src="panel.js"></script>

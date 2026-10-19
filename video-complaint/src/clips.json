@@ -1,0 +1,10 @@
+{
+  "_help": "For a real clip: startFrom is frames to skip, seconds is the length of the part to use. The clip is sped up or slowed down so that part fills the scene. Defaults play the clip as recorded.",
+  "gmail-open": { "startFrom": 0, "seconds": null },
+  "panel-open": { "startFrom": 0, "seconds": null },
+  "review": { "startFrom": 0, "seconds": null },
+  "run-ai": { "startFrom": 0, "seconds": null },
+  "result": { "startFrom": 0, "seconds": null },
+  "accuracy": { "startFrom": 0, "seconds": null },
+  "path": { "startFrom": 0, "seconds": null }
+}

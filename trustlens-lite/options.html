@@ -7,10 +7,15 @@
     :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
     body { max-width: 520px; margin: 24px auto; padding: 0 16px; }
     label { display: block; margin-top: 14px; font-weight: 600; }
-    input[type=text], input[type=password] { width: 100%; box-sizing: border-box; padding: 6px; font: inherit; }
+    input[type=text], input[type=password], select { width: 100%; box-sizing: border-box; padding: 6px; font: inherit; }
     .row label { display: flex; gap: 8px; align-items: center; font-weight: normal; }
     button { margin-top: 16px; padding: 6px 14px; font: inherit; }
     #status { margin-left: 10px; }
+    h2 { font-size: 1.1rem; margin-top: 24px; }
+    .hint { color: GrayText; font-size: 0.875rem; }
+    .advanced { margin-top: 32px; font-size: 0.875rem; }
+    #diag-out { white-space: pre-wrap; background: Canvas; border: 1px solid GrayText; padding: 8px; display: none; }
+    #diag-out:not(:empty) { display: block; }
   </style>
 </head>
 <body>
@@ -20,11 +25,25 @@
     <input id="endpoint" type="text" autocomplete="off">
     <label for="model">Model name</label>
     <input id="model" type="text" autocomplete="off">
+    <label for="orgProfile">Organisation profile</label>
+    <select id="orgProfile">
+      <option value="rimpa">RIMPA Global (governance documents)</option>
+      <option value="harbourview">Harbourview Records Services (complaints)</option>
+    </select>
     <label for="apiKey">API key</label>
     <input id="apiKey" type="password" autocomplete="off">
     <div class="row"><label><input id="demoMode" type="checkbox"> Demo mode (canned report, no API call)</label></div>
+    <h2>Gmail (demo account only)</h2>
+    <label for="gmailAddress">Demo Gmail account</label>
+    <input id="gmailAddress" type="text" autocomplete="off" placeholder="test.address@example.com">
+    <div class="row"><label><input id="gmailEnabled" type="checkbox"> Enable Gmail reading</label></div>
+    <p class="hint">Off by default. The reader only runs when this is on and the account shown in Gmail is exactly this address. It uses the browser's own signed-in session. Nothing from the page is stored.</p>
     <button type="submit">Save</button><span id="status" role="status"></span>
   </form>
+  <details class="advanced"><summary>Advanced</summary>
+    <p><a href="#" id="diag-link">Gmail diagnostics</a></p>
+    <pre id="diag-out" aria-live="polite"></pre>
+  </details>
   <script type="module" src="options.js"></script>
 </body>
 </html>

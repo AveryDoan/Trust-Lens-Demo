@@ -1,0 +1,110 @@
+{
+  "note": "fictional demo policy",
+  "pack": "harbourview",
+  "policies": [
+    {
+      "id": "H1.1",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "1. Complaints, 1.1",
+      "quote": "A written complaint is acknowledged in writing within 1 business day of receipt.",
+      "rule": "Acknowledge a written complaint in writing within 1 business day."
+    },
+    {
+      "id": "H1.2",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "1. Complaints, 1.2",
+      "quote": "A written outcome is provided within 10 business days of receipt.",
+      "rule": "Give a written outcome within 10 business days."
+    },
+    {
+      "id": "H1.3",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "1. Complaints, 1.3",
+      "quote": "A complaint that alleges fraud or staff misconduct is referred to the Complaints Manager and is not handled by the team the complaint is about.",
+      "rule": "Refer fraud or staff-misconduct allegations to the Complaints Manager, not the team complained about."
+    },
+    {
+      "id": "H2.1",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "2. Billing accuracy, 2.1",
+      "quote": "An invoice must match the signed service agreement.",
+      "rule": "An invoice must match the signed service agreement."
+    },
+    {
+      "id": "H2.2",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "2. Billing accuracy, 2.2",
+      "quote": "A charge or rate that is not in the agreement requires the customer's prior written approval.",
+      "rule": "A charge or rate outside the agreement needs prior written customer approval."
+    },
+    {
+      "id": "H2.3",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "2. Billing accuracy, 2.3",
+      "quote": "An invoice is only valid if it was issued from the billing system.",
+      "rule": "An invoice is only valid if issued from the billing system."
+    },
+    {
+      "id": "H3.1",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "3. Corrections and refunds, 3.1",
+      "quote": "A corrected invoice or refund requires approval by the Billing Manager.",
+      "rule": "Corrected invoices and refunds need Billing Manager approval."
+    },
+    {
+      "id": "H3.2",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "3. Corrections and refunds, 3.2",
+      "quote": "A refund over $10,000 also requires approval by the Finance Director.",
+      "rule": "Refunds over $10,000 also need Finance Director approval."
+    },
+    {
+      "id": "H4.1",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "4. Personal information, 4.1",
+      "quote": "Personal information in customer correspondence is restricted to the complaints team and the Privacy Officer.",
+      "rule": "Restrict customer personal information to the complaints team and Privacy Officer."
+    },
+    {
+      "id": "H4.2",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "4. Personal information, 4.2",
+      "quote": "Suspected exposure of personal information is reported to the Privacy Officer within 1 business day.",
+      "rule": "Report suspected exposure of personal information to the Privacy Officer within 1 business day."
+    },
+    {
+      "id": "H4.3",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "4. Personal information, 4.3",
+      "quote": "Personal information is redacted before it is shared more widely and is never entered into external AI tools.",
+      "rule": "Redact personal information before wider sharing; never enter it into external AI tools."
+    },
+    {
+      "id": "H4.4",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "4. Personal information, 4.4",
+      "quote": "Staff must not ask customers to send a date of birth or home address by email to prove their identity.",
+      "rule": "Do not ask customers to email a date of birth or home address to prove identity."
+    },
+    {
+      "id": "H5.1",
+      "document": "Harbourview Customer Complaints, Billing and Privacy Procedure (fictional demo)",
+      "version": "1.0",
+      "section": "5. Records, 5.1",
+      "quote": "The complaint, its attachments and the outcome are kept in the case file, and kept and disposed of under the records disposal authority.",
+      "rule": "Keep complaint records in the case file and dispose of them under the records disposal authority."
+    }
+  ]
+}

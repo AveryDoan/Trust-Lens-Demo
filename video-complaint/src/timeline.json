@@ -1,0 +1,81 @@
+{
+ "fps": 30,
+ "total": 900,
+ "scenes": [
+  {
+   "id": "S1",
+   "from": 0,
+   "to": 89,
+   "captions": [
+    {
+     "text": "A customer says they were overcharged.",
+     "from": 6,
+     "to": 86
+    }
+   ]
+  },
+  {
+   "id": "S2",
+   "from": 90,
+   "to": 309,
+   "captions": [
+    {
+     "text": "It reads the email and attachments.",
+     "from": 96,
+     "to": 165
+    },
+    {
+     "text": "Then it gives the next step.",
+     "from": 168,
+     "to": 237
+    },
+    {
+     "text": "Bias, governance and policy are checked.",
+     "from": 244,
+     "to": 305
+    }
+   ]
+  },
+  {
+   "id": "S3",
+   "from": 310,
+   "to": 539,
+   "captions": [
+    {
+     "text": "Every step quotes the files.",
+     "from": 316,
+     "to": 435
+    },
+    {
+     "text": "And the rule it comes from.",
+     "from": 442,
+     "to": 537
+    }
+   ]
+  },
+  {
+   "id": "S4",
+   "from": 540,
+   "to": 779,
+   "captions": [
+    {
+     "text": "Personal details stay masked.",
+     "from": 546,
+     "to": 675
+    },
+    {
+     "text": "Each quote is checked against the file.",
+     "from": 682,
+     "to": 777
+    }
+   ]
+  },
+  {
+   "id": "S5",
+   "from": 780,
+   "to": 899,
+   "captions": []
+  }
+ ],
+ "captionPx": 48
+}

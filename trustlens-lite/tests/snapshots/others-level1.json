@@ -1,0 +1,30 @@
+{
+  "email-a": {
+    "view": "Do not distribute until reviewed\n\nAllegation treated as proven; private details shared widely.\n\nFollow advice\nOverride\nBias\nConcern\nGroups members under 30\n\nThe email blames members under 30, as a group, for trouble at events.\n\nFrom the email\n\nmembers under 30 are always the ones causing trouble at our events\n\nNext step: Remove the age-based generalisation and judge people on their own conduct.\n\nCode of Professional Conduct s7.3\nAccuracy\nConcern\nTreats allegation as proven\nDeception risk\nCheck\nClaims sound more certain than proof\nGovernance\nCheck\nNames a complainant; wide list\n\n2 items masked",
+    "stamp": "Do not distribute until reviewed"
+  },
+  "email-b": {
+    "view": "Verify the source first\n\nUnverified claims and loaded language in an election message.\n\nFollow advice\nOverride\nBias\nCheck\nPersonal attack on a nominee\nAccuracy\nCheck\nUnverified claims, including the 80% figure\nDeception risk\nConcern\nUrgent, loaded language; no source\n\nThe message uses urgent, loaded language, names no author or source, and urges wide sharing.\n\nFrom the email\n\nURGENT: Nominee Rowe is the only one who will fight for you\n+2 more\n\nNext step: Check who sent this before forwarding it.\n\nElection Campaign Code of Conduct s7.1\n\nMedium confidence\n\nGovernance\nOK\nNo personal information found",
+    "stamp": "Verify the source first"
+  },
+  "email-c": {
+    "view": "OK to use\n\nNeutral, accurate and cleared for members.\n\nFollow advice\nOverride\nBias\nOK\nNo one-sided wording\nAccuracy\nOK\nVersions match the published documents\nDeception risk\nOK\nSource and location are named\nGovernance\nOK\nCleared for the member newsletter",
+    "stamp": "OK to use"
+  },
+  "file-01-case-note": {
+    "view": "01-case-note.md · 768 B · Read 758 characters\n\nDo not distribute until reviewed\n\nAllegation treated as proven; private details shared widely.\n\nFollow advice\nOverride\nBias\nConcern\nGroups members under 30\n\nThe note blames members under 30, as a group, for trouble at events.\n\nQuoted from the file\n\nMembers under 30 are always the ones causing trouble at our events\n\nNext step: Remove the age-based generalisation and judge people on their own conduct.\n\nCode of Professional Conduct s7.3\nAccuracy\nConcern\nTreats allegation as proven\nDeception risk\nCheck\nClaims sound more certain than proof\nGovernance\nCheck\nNames a complainant; wide list\n\n2 items masked",
+    "stamp": "Do not distribute until reviewed"
+  },
+  "file-02-election-flyer": {
+    "view": "02-election-flyer.md · 419 B · Read 415 characters\n\nVerify the source first\n\nUnverified claims and loaded language in an election message.\n\nFollow advice\nOverride\nBias\nCheck\nPersonal attack on a nominee\nAccuracy\nCheck\nUnverified claims, including the 80% figure\nDeception risk\nConcern\nUrgent, loaded language; no source\n\nThe flyer uses urgent, loaded language, names no author or source, and urges wide sharing.\n\nQuoted from the file\n\nURGENT: Nominee Rowe is the only one who will fight for you\n+2 more\n\nNext step: Check who sent this before forwarding it.\n\nElection Campaign Code of Conduct s7.1\n\nMedium confidence\n\nGovernance\nOK\nNo personal information found",
+    "stamp": "Verify the source first"
+  },
+  "file-03-governance-update": {
+    "view": "03-governance-update.md · 385 B · Read 381 characters\n\nOK to use\n\nNeutral, accurate and cleared for members.\n\nFollow advice\nOverride\nBias\nOK\nNo one-sided wording\nAccuracy\nOK\nVersions match the published documents\nDeception risk\nOK\nSource and location are named\nGovernance\nOK\nCleared for the member newsletter",
+    "stamp": "OK to use"
+  },
+  "file-04-ai-briefing": {
+    "view": "04-ai-briefing.md · 613 B · Read 607 characters\n\nRevise before using\n\nClaims about the Privacy Policy do not match the published policy.\n\nFollow advice\nOverride\nBias\nOK\nNo one-sided wording\nAccuracy\nConcern\nPolicy claims contradict the published policy\n\nThree claims about the Privacy Policy conflict with it, and one has no support in it.\n\nQuoted from the file\n\nmember records must be kept for seven years and cannot be disposed of earlier\n+2 more\n\nNext step: Correct the policy claims before relying on this briefing.\n\nPrivacy Policy s13\nDeception risk\nCheck\nAI-written, unreviewed, no source\nGovernance\nCheck\nMember data sent to AI without basis",
+    "stamp": "Revise before using"
+  }
+}
