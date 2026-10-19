@@ -10,38 +10,57 @@
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
-.wrap{max-width:1000px;margin:0 auto;padding:24px 16px 48px}
-h1{font-size:28px;margin:0 0 4px}
-.sub{color:var(--mute);margin:0 0 20px}
-.map{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:20px}
-.map div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14px}
-.map b{display:block;margin-bottom:2px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
-.chip{border:1.5px solid var(--line);background:var(--card);color:var(--text);border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer}
+body.drawer-open{overflow:hidden}
+.wrap{max-width:1120px;margin:0 auto;padding:40px 20px 56px}
+.eyebrow{color:var(--brand);font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 8px}
+h1{font-size:clamp(28px,4vw,42px);letter-spacing:-.03em;margin:0 0 8px}
+.sub{color:var(--mute);margin:0 0 28px;max-width:680px}
+.map{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+.map div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;font-size:14px;box-shadow:0 2px 8px #1f23400a}
+.map b{display:block;margin-bottom:4px}
+.map span{color:var(--mute)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.chip{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:999px;padding:8px 14px;font-size:13px;cursor:pointer}
 .chip[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}
-.count{color:var(--mute);font-size:13px;margin:8px 0 14px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
-.card{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
-.org{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
-.card h3{margin:0;font-size:16px}
-.card p{margin:0;font-size:14px}
-.use{background:var(--bg);border-radius:8px;padding:8px 10px;font-size:13px}
+.count{color:var(--mute);font-size:13px;margin:12px 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px}
+.card{appearance:none;text-align:left;width:100%;background:var(--card);color:var(--text);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:9px;cursor:pointer;box-shadow:0 2px 8px #1f23400a;transition:transform .15s,box-shadow .15s}
+.card:hover,.card:focus-visible{transform:translateY(-2px);box-shadow:0 8px 20px #1f234014;outline:none}
+.card:focus-visible{box-shadow:0 0 0 3px #6d5bd055}
+.org{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em}
+.card h3{margin:0;font-size:16px;line-height:1.3}
+.card p{margin:0;font-size:14px;color:var(--mute)}
+.use{background:var(--bg);border-radius:9px;padding:9px 10px;font-size:13px}
 .row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;font-size:12px;color:var(--mute)}
-.card a{color:var(--brand);font-weight:600;text-decoration:none;font-size:14px}
+.open-hint{color:var(--brand);font-weight:700;font-size:13px}
 .tag{display:inline-block;border-radius:6px;padding:2px 8px;border:1px solid var(--c);color:var(--c);font-size:12px}
 .note{margin-top:28px;color:var(--mute);font-size:13px}
+.drawer-backdrop{position:fixed;inset:0;background:#1f23404d;opacity:0;pointer-events:none;transition:opacity .2s}
+.drawer{position:fixed;z-index:2;top:0;right:0;height:100%;width:min(460px,100%);background:var(--card);padding:28px;overflow:auto;box-shadow:-10px 0 30px #1f23401f;transform:translateX(100%);transition:transform .25s}
+.drawer-open .drawer-backdrop{opacity:1;pointer-events:auto}
+.drawer-open .drawer{transform:translateX(0)}
+.drawer-close{float:right;border:0;background:var(--bg);color:var(--text);border-radius:50%;width:34px;height:34px;font-size:22px;line-height:1;cursor:pointer}
+.drawer h2{font-size:24px;line-height:1.25;margin:42px 0 8px}
+.drawer-org{color:var(--mute);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+.drawer-section{border-top:1px solid var(--line);margin-top:24px;padding-top:18px}
+.drawer-section h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:0 0 7px}
+.drawer-section p{margin:0}
+.source-link{display:inline-block;margin-top:22px;background:var(--brand);color:#fff;border-radius:9px;padding:11px 15px;text-decoration:none;font-weight:700}
+@media (max-width:720px){.wrap{padding:28px 16px 44px}.map{grid-template-columns:repeat(2,1fr)}.drawer{padding:22px}}
+@media (max-width:430px){.map{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div class="wrap">
+<p class="eyebrow">TrustLens research library</p>
 <h1>TrustLens AI Knowledge Repo</h1>
-<p class="sub">21 sources behind our idea. Tap a theme to filter. Tap Open to read the original.</p>
+<p class="sub">A curated library of 21 sources behind our idea. Choose a theme, then select any source to read its summary and open the original.</p>
 
 <div class="map">
-<div><b>Is it biased?</b>AI ethics guides and real cases</div>
-<div><b>Is it accurate?</b>Misinformation codes and policy</div>
-<div><b>Could it mislead?</b>Provenance and content credentials</div>
-<div><b>How to manage?</b>Records and archives guidance</div>
+<div><b>Is it biased?</b><span>AI ethics guides and real cases</span></div>
+<div><b>Is it accurate?</b><span>Misinformation codes and policy</span></div>
+<div><b>Could it mislead?</b><span>Provenance and content credentials</span></div>
+<div><b>How to manage?</b><span>Records and archives guidance</span></div>
 </div>
 
 <div class="chips" id="chips"></div>
@@ -50,6 +69,17 @@ h1{font-size:28px;margin:0 0 4px}
 
 <p class="note">“Read in full” means we opened the page and summarised it. “From title” means the page blocked us or was not opened, so the summary uses the Hack Pack description. Please skim those before quoting them.</p>
 </div>
+<div class="drawer-backdrop" id="drawerBackdrop"></div>
+<aside class="drawer" id="drawer" aria-labelledby="drawerTitle" aria-hidden="true">
+<button class="drawer-close" id="drawerClose" type="button" aria-label="Close details">×</button>
+<div class="drawer-org" id="drawerOrg"></div>
+<h2 id="drawerTitle"></h2>
+<span class="tag" id="drawerTag"></span>
+<div class="drawer-section"><h3>Summary</h3><p id="drawerSummary"></p></div>
+<div class="drawer-section"><h3>How it informs TrustLens</h3><p id="drawerUse"></p></div>
+<p id="drawerStatus" class="note"></p>
+<a class="source-link" id="drawerLink" href="#" target="_blank" rel="noopener">Open original source ↗</a>
+</aside>
 
 <script>
 var T={
@@ -82,23 +112,29 @@ var S=[
 ["risk","Public Record Office Victoria","High value, high risk records","Managing high value and high risk records in Victoria.","Same idea, second state example.","https://prov.vic.gov.au/recordkeeping-government/a-z-topics/high-value-high-risk-records",0]
 ];
 var sel="all",chips=document.getElementById("chips"),grid=document.getElementById("grid"),cnt=document.getElementById("count");
+var drawer=document.getElementById("drawer"),lastCard=null;
 function chip(k,l){var b=document.createElement("button");b.className="chip";b.textContent=l;b.setAttribute("aria-pressed",k===sel);b.onclick=function(){sel=k;draw()};chips.appendChild(b)}
+function closeDrawer(){document.body.classList.remove("drawer-open");drawer.setAttribute("aria-hidden","true");if(lastCard)lastCard.focus()}
+function openDrawer(s,d){lastCard=d;document.getElementById("drawerOrg").textContent=s[1];document.getElementById("drawerTitle").textContent=s[2];document.getElementById("drawerTag").textContent=T[s[0]].n;document.getElementById("drawerSummary").textContent=s[3];document.getElementById("drawerUse").textContent=s[4];document.getElementById("drawerStatus").textContent=s[6]?"Read in full":"From title";var link=document.getElementById("drawerLink");link.href=s[5];document.body.classList.add("drawer-open");drawer.setAttribute("aria-hidden","false");document.getElementById("drawerClose").focus()}
 function draw(){chips.innerHTML="";chip("all","All ("+S.length+")");
 for(var k in T){chip(k,T[k].n+" ("+S.filter(function(s){return s[0]===k}).length+")")}
 grid.innerHTML="";var n=0;
 S.forEach(function(s){if(sel!=="all"&&s[0]!==sel)return;n++;
-var d=document.createElement("div");d.className="card";d.style.setProperty("--c",T[s[0]].c);
+var d=document.createElement("button");d.className="card";d.type="button";d.style.setProperty("--c",T[s[0]].c);d.setAttribute("aria-label","View details for "+s[2]);d.onclick=function(){openDrawer(s,d)};
 var a=document.createElement("div");a.className="org";a.textContent=s[1];
 var h=document.createElement("h3");h.textContent=s[2];
 var p=document.createElement("p");p.textContent=s[3];
 var u=document.createElement("div");u.className="use";u.textContent="Use in TrustLens: "+s[4];
 var r=document.createElement("div");r.className="row";
 var t=document.createElement("span");t.className="tag";t.textContent=T[s[0]].n;
-var l=document.createElement("a");l.href=s[5];l.target="_blank";l.rel="noopener";l.textContent="Open";
+var l=document.createElement("span");l.className="open-hint";l.textContent="View details →";
 var m=document.createElement("span");m.textContent=s[6]?"Read in full":"From title";
 r.appendChild(m);r.appendChild(l);
 d.appendChild(a);d.appendChild(h);d.appendChild(p);d.appendChild(u);d.appendChild(t);d.appendChild(r);grid.appendChild(d)});
 cnt.textContent="Showing "+n+" sources"}
+document.getElementById("drawerClose").onclick=closeDrawer;
+document.getElementById("drawerBackdrop").onclick=closeDrawer;
+document.addEventListener("keydown",function(e){if(e.key==="Escape"&&document.body.classList.contains("drawer-open"))closeDrawer()});
 draw();
 </script>
 </body>
