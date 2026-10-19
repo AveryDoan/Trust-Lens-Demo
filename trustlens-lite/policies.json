@@ -1,0 +1,41 @@
+{
+  "note": "Synthetic demo content, not real policy",
+  "policies": [
+    {
+      "id": "P1",
+      "title": "Information classification",
+      "text": "Every document has one level. Public: approved for anyone. Internal: for staff only; low harm if leaked. Confidential: sensitive business information, shared on a need-to-know basis. Confidential - Personal Information: any information about an identifiable person, such as names with contact details, tax file numbers, card numbers or complaint details. Use the highest level that applies.",
+      "rule": "Assign exactly one classification: Public, Internal, Confidential, or Confidential - Personal Information. Any identifiable personal information means Confidential - Personal Information."
+    },
+    {
+      "id": "P2",
+      "title": "Personal information",
+      "text": "Personal information must be masked before any AI use. It must never be sent to external AI tools. It may be shared only with named roles who need it for their work, such as the case officer and the privacy officer. Do not paste it into chat, email or public pages.",
+      "rule": "If personal information is present: AI tool use is not allowed until it is masked; external AI tools are never allowed; sharing is limited to named roles."
+    },
+    {
+      "id": "P3",
+      "title": "AI use",
+      "text": "Only the approved internal assistant may be used with work content, and only after redaction of personal information. Other AI tools are not approved. When AI output is used in a decision, the output, the input given and the date must be kept as a record.",
+      "rule": "AI tool use is allowed only for the approved internal assistant and only for redacted content. AI output that informs a decision must be recorded."
+    },
+    {
+      "id": "P4",
+      "title": "Records retention",
+      "text": "Complaint records are kept for seven years after case closure. After seven years they are reviewed for disposal by the records manager. They must not be deleted earlier, and must not be kept longer without a documented reason.",
+      "rule": "Complaint records: retain 7 years after case closure, then review for disposal."
+    },
+    {
+      "id": "P5",
+      "title": "Approved reference facts",
+      "text": "Approved facts for checking claims. 1) The 2025 internal fraud review found no significant difference in fraud rates between customer groups. 2) Complaint data does not record customer ethnicity. A claim that contradicts an approved fact may be inaccurate. A claim not covered here is neither confirmed nor refuted.",
+      "rule": "Compare claims with these approved facts only. Contradiction suggests an accuracy concern. Do not treat an uncovered claim as false."
+    },
+    {
+      "id": "P6",
+      "title": "Source and provenance",
+      "text": "Externally sourced claims in business documents must name the author, the date and the original source. A claim with statistics or quotes but no named source, or with only a vague source such as 'studies show' or 'experts say', needs checking before use.",
+      "rule": "Externally sourced claims need author, date and original source. Missing or vague provenance suggests a check is needed."
+    }
+  ]
+}

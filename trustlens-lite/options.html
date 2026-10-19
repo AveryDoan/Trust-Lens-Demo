@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>TrustLens Lite settings</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { max-width: 520px; margin: 24px auto; padding: 0 16px; }
+    label { display: block; margin-top: 14px; font-weight: 600; }
+    input[type=text], input[type=password] { width: 100%; box-sizing: border-box; padding: 6px; font: inherit; }
+    .row label { display: flex; gap: 8px; align-items: center; font-weight: normal; }
+    button { margin-top: 16px; padding: 6px 14px; font: inherit; }
+    #status { margin-left: 10px; }
+  </style>
+</head>
+<body>
+  <h1>TrustLens Lite settings</h1>
+  <form id="form">
+    <label for="endpoint">API endpoint</label>
+    <input id="endpoint" type="text" autocomplete="off">
+    <label for="model">Model name</label>
+    <input id="model" type="text" autocomplete="off">
+    <label for="apiKey">API key</label>
+    <input id="apiKey" type="password" autocomplete="off">
+    <div class="row"><label><input id="demoMode" type="checkbox"> Demo mode (canned report, no API call)</label></div>
+    <button type="submit">Save</button><span id="status" role="status"></span>
+  </form>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

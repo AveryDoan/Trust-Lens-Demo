@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TrustLens demo page</title>
+  <style>body { font: 18px/1.5 Georgia, serif; max-width: 40rem; margin: 2rem auto; padding-inline: 1rem; }</style>
+</head>
+<body>
+  <article>
+    <h1>Fraud trends</h1>
+    <p id="intro">Hi team, <em>our analysis shows</em> that customers from Group X commit far more
+       fraud than everyone else. <a id="link" href="#x">Everyone knows it</a>, so we should flag them early.</p>
+    <p>Questions to jane.doe@example.com or 0412 345 678 or 02 9876 5432. This paragraph is padding so the page scrolls.</p>
+    <p style="margin-block: 60vh 0">Further down the page: the records team keeps complaint files for seven years after case closure.</p>
+  </article>
+  <script>
+    window.clicks = 0;
+    document.getElementById('intro').addEventListener('click', () => window.clicks++);
+    document.getElementById('link').addEventListener('click', (e) => { e.preventDefault(); window.clicks += 10; });
+  </script>
+</body>
+</html>

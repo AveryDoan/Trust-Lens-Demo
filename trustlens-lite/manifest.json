@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "TrustLens Lite",
+  "version": "0.1.0",
+  "description": "Assess selected text for bias, accuracy, deception risk and information governance. Signals, not proof.",
+  "minimum_chrome_version": "123",
+  "permissions": ["sidePanel", "contextMenus", "activeTab", "scripting", "storage"],
+  "host_permissions": ["https://api.anthropic.com/*"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": { "default_title": "Check with TrustLens" },
+  "side_panel": { "default_path": "panel.html" },
+  "options_ui": { "page": "options.html", "open_in_tab": true }
+}
