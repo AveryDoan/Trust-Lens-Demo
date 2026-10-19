@@ -32,7 +32,7 @@ const LABELS = {
   escalate: 'Do not distribute until reviewed',
   redact: 'Redact personal information before sharing',
   revise: 'Revise before using',
-  verify: 'Verify the source before relying on this',
+  verify: 'Verify the source first',
   restrict: 'Share only with the right people',
   approve: 'OK to use',
 };
@@ -61,6 +61,24 @@ run('never throws on missing or odd input', () => {
   }
   assert.equal(overallAction({}, undefined).action, 'approve');
 });
+
+run('basis: union of cited ids from the checks that triggered the rule, in check order', () => {
+  const r = clean();
+  r.bias = check({ status: 'Concern', basis: ['CP1'] });
+  r.accuracy = check({ status: 'Concern', basis: ['C1', 'C5'], next_step: 'Refer to it as an allegation.' });
+  r.deception = check({ status: 'Check', basis: ['EC1'] });
+  const out = overallAction(r, []);
+  assert.equal(out.action, 'escalate');
+  assert.deepEqual(out.basis, ['CP1', 'C1', 'C5']);
+  assert.equal(out.step, r.bias.next_step);
+  r.governance.basis = ['C2', 'C3'];
+  assert.deepEqual(overallAction(clean2(r), PII).basis, ['C2', 'C3']); // redact rule uses the governance basis
+  const v = clean(); v.accuracy.claims = [{ claim: 'x', label: 'contradicted', source: 'C1' }]; v.accuracy.basis = ['C5'];
+  assert.deepEqual(overallAction(v, []).basis, ['C5', 'C1']);
+  assert.deepEqual(overallAction({}, []).basis, []);
+  assert.deepEqual(overallAction({ bias: { basis: 'oops' } }, null).basis, []);
+});
+function clean2(r) { return { ...clean(), governance: r.governance }; }
 
 console.log(failed ? `\n${failed} failed` : '\nall passed');
 process.exit(failed ? 1 : 0);

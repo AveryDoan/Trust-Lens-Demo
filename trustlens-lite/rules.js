@@ -15,59 +15,47 @@ function isGroupBiasConcern(report) {
   return GROUP_WORDS.test(text);
 }
 
+// Union of cited policy ids, in the order given. Missing or odd basis values are ignored.
+const basisOf = (report, names) => [...new Set(names.flatMap((n) => asArray(report?.[n]?.basis).filter((id) => typeof id === 'string')))];
+const stepOf = (report, names) => names.map((n) => report?.[n]?.next_step).find((s) => typeof s === 'string' && s.trim()) ?? null;
+
+// Returns { action, label, reason, basis, step }. basis is the union of the policy ids cited by the checks
+// that triggered the rule, in check order. step is the next step of the first of those checks.
 export function overallAction(report, piiFindings) {
   const claims = asArray(report?.accuracy?.claims).filter((c) => c && typeof c === 'object');
-  const concerns = CHECKS.filter((name) => statusOf(report, name) === 'Concern').length;
+  const concernNames = CHECKS.filter((name) => statusOf(report, name) === 'Concern');
   const classification = report?.governance?.classification;
+  const make = (action, label, reason, names, extraIds = []) => ({
+    action, label, reason,
+    basis: [...new Set([...basisOf(report, names), ...extraIds])],
+    step: stepOf(report, names),
+  });
 
-  if (concerns >= 2) {
-    return {
-      action: 'escalate',
-      label: 'Do not distribute until reviewed',
-      reason: `Rule 1: ${concerns} checks show a concern, so a person should review this before it goes anywhere.`,
-    };
+  if (concernNames.length >= 2) {
+    return make('escalate', 'Do not distribute until reviewed',
+      `Rule 1: ${concernNames.length} checks show a concern. A person should review it.`, concernNames);
   }
   if (isGroupBiasConcern(report)) {
-    return {
-      action: 'escalate',
-      label: 'Do not distribute until reviewed',
-      reason: 'Rule 1: the bias check shows a potential concern about a group of people, so a person should review this first.',
-    };
+    return make('escalate', 'Do not distribute until reviewed',
+      'Rule 1: the bias check shows a concern about a group of people.', ['bias']);
   }
   if (asArray(piiFindings).length > 0) {
-    return {
-      action: 'redact',
-      label: 'Redact personal information before sharing',
-      reason: 'Rule 2: personal information was found in the text.',
-    };
+    return make('redact', 'Redact personal information before sharing', 'Rule 2: personal information was found in the text.', ['governance']);
   }
-  if (claims.some((c) => c.label === 'contradicted')) {
-    return {
-      action: 'revise',
-      label: 'Revise before using',
-      reason: 'Rule 3: at least one claim appears to be contradicted by the policy pack.',
-    };
+  const contradicted = claims.filter((c) => c.label === 'contradicted');
+  if (contradicted.length) {
+    return make('revise', 'Revise before using', 'Rule 3: a claim appears to be contradicted by a policy.', ['accuracy'],
+      contradicted.map((c) => c.source).filter((id) => typeof id === 'string' && id));
   }
   if (claims.some((c) => c.label === 'unverified')) {
-    return {
-      action: 'verify',
-      label: 'Verify the source before relying on this',
-      reason: 'Rule 4: at least one main claim could not be checked against the policy pack.',
-    };
+    return make('verify', 'Verify the source first', 'Rule 4: a main claim could not be checked against a policy.',
+      ['accuracy', ...(['Check', 'Concern'].includes(statusOf(report, 'deception')) ? ['deception'] : [])]);
   }
   if (statusOf(report, 'deception') === 'Check' || statusOf(report, 'deception') === 'Concern') {
-    return {
-      action: 'verify',
-      label: 'Verify the source before relying on this',
-      reason: 'Rule 4: the deception check found signals worth checking. These are not proof of intent.',
-    };
+    return make('verify', 'Verify the source first', 'Rule 4: the deception check found signals worth checking.', ['deception']);
   }
   if (typeof classification === 'string' && classification.trim() && classification.trim().toLowerCase() !== 'public') {
-    return {
-      action: 'restrict',
-      label: 'Share only with the right people',
-      reason: `Rule 5: the text is classified above Public (${classification.trim()}).`,
-    };
+    return make('restrict', 'Share only with the right people', `Rule 5: the text is classified above Public (${classification.trim()}).`, ['governance']);
   }
-  return { action: 'approve', label: 'OK to use', reason: 'Rule 6: no rule above fired.' };
+  return { ...make('approve', 'OK to use', 'Rule 6: no rule above fired.', CHECKS), step: null };
 }

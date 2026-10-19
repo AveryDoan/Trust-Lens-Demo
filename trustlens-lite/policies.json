@@ -1,41 +1,167 @@
 {
-  "note": "Synthetic demo content, not real policy",
+  "note": "Quotes are copied verbatim from the RIMPA Global PDFs downloaded from rimpa.com.au on 2026-10-19 (see policies/). A quote with \" … \" joins separate passages. PR3 records a gap.",
   "policies": [
     {
-      "id": "P1",
-      "title": "Information classification",
-      "text": "Every document has one level. Public: approved for anyone. Internal: for staff only; low harm if leaked. Confidential: sensitive business information, shared on a need-to-know basis. Confidential - Personal Information: any information about an identifiable person, such as names with contact details, tax file numbers, card numbers or complaint details. Use the highest level that applies.",
-      "rule": "Assign exactly one classification: Public, Internal, Confidential, or Confidential - Personal Information. Any identifiable personal information means Confidential - Personal Information."
+      "id": "C1",
+      "document": "Complaints and Grievance Policy",
+      "version": "3.0",
+      "section": "10.3",
+      "quote": "All grievances should be referred to as allegations until the findings of the investigation are made.",
+      "rule": "Describe claims about a complaint or grievance as allegations until the investigation has made findings. Do not treat them as proven."
     },
     {
-      "id": "P2",
-      "title": "Personal information",
-      "text": "Personal information must be masked before any AI use. It must never be sent to external AI tools. It may be shared only with named roles who need it for their work, such as the case officer and the privacy officer. Do not paste it into chat, email or public pages.",
-      "rule": "If personal information is present: AI tool use is not allowed until it is masked; external AI tools are never allowed; sharing is limited to named roles."
+      "id": "C2",
+      "document": "Complaints and Grievance Policy",
+      "version": "3.0",
+      "section": "8",
+      "quote": "any breach of confidentiality may result in action taken in accordance with misconduct clauses of the RIMPA Global Constitution … all personal information collected under this policy, and all associated procedures will be managed in accordance with the RIMPA Global Privacy Policy",
+      "rule": "Complaint details are confidential. A breach of confidentiality can lead to action under the Constitution. Personal information in a complaint is handled under the Privacy Policy."
     },
     {
-      "id": "P3",
-      "title": "AI use",
-      "text": "Only the approved internal assistant may be used with work content, and only after redaction of personal information. Other AI tools are not approved. When AI output is used in a decision, the output, the input given and the date must be kept as a record.",
-      "rule": "AI tool use is allowed only for the approved internal assistant and only for redacted content. AI output that informs a decision must be recorded."
+      "id": "C3",
+      "document": "Complaints and Grievance Policy",
+      "version": "3.0",
+      "section": "12",
+      "quote": "will be managed by RIMPA Global Central Office in a secured case file available to the investigating committee, for a period of time defined in RIMPA disposal authority, or NAA records authorities in the absence of a RIMPA authority.",
+      "rule": "Complaint records go in a secured case file available to the investigating committee. The retention period is whatever the RIMPA disposal authority sets, or the NAA records authorities if there is none. The policy states no fixed period. Never state one."
     },
     {
-      "id": "P4",
-      "title": "Records retention",
-      "text": "Complaint records are kept for seven years after case closure. After seven years they are reviewed for disposal by the records manager. They must not be deleted earlier, and must not be kept longer without a documented reason.",
-      "rule": "Complaint records: retain 7 years after case closure, then review for disposal."
+      "id": "C4",
+      "document": "Complaints and Grievance Policy",
+      "version": "3.0",
+      "section": "10.1",
+      "quote": "Complaints are lodged with the CEO or the Chair of the Board.",
+      "rule": "A complaint goes to the CEO or the Chair of the Board."
     },
     {
-      "id": "P5",
-      "title": "Approved reference facts",
-      "text": "Approved facts for checking claims. 1) The 2025 internal fraud review found no significant difference in fraud rates between customer groups. 2) Complaint data does not record customer ethnicity. 3) Harbourview Council Notice 2026-14 (published 12 October 2026): from 2 November 2026 library branches open at 9:00 am on weekdays; Saturday hours are 10:00 am to 4:00 pm. A claim that contradicts an approved fact may be inaccurate. A claim not covered here is neither confirmed nor refuted.",
-      "rule": "Compare claims with these approved facts only. Contradiction suggests an accuracy concern. Do not treat an uncovered claim as false."
+      "id": "C5",
+      "document": "Complaints and Grievance Policy",
+      "version": "3.0",
+      "section": "10.5, 11.8",
+      "quote": "An investigation committee as per the Constitution is appointed by the Board to manage the grievance process. … The Board may impose penalties to the respondent(s) as a result of the grievance investigation as per the RIMPA Global Constitution.",
+      "rule": "The Board appoints the investigation committee, and the Board decides any penalty. An individual should not decide a penalty or act as if one had been decided."
     },
     {
-      "id": "P6",
-      "title": "Source and provenance",
-      "text": "Externally sourced claims in business documents must name the author, the date and the original source. A claim with statistics or quotes but no named source, or with only a vague source such as 'studies show' or 'experts say', needs checking before use.",
-      "rule": "Externally sourced claims need author, date and original source. Missing or vague provenance suggests a check is needed."
+      "id": "PR1",
+      "document": "Privacy Policy",
+      "version": "3.0",
+      "section": "10",
+      "quote": "Personal information will only be shared in accordance with the primary reason it was collected, with the individual's consent, or where required by an emergency or the law.",
+      "rule": "Share personal information only for the reason it was collected, with consent, or where an emergency or the law requires it."
+    },
+    {
+      "id": "PR2",
+      "document": "Privacy Policy",
+      "version": "3.0",
+      "section": "12",
+      "quote": "For example, employee access to personal information to that which they need to carry out their role is limited.",
+      "rule": "Access to personal information is limited to what a role needs. Sending it to a wide list goes beyond that."
+    },
+    {
+      "id": "PR4",
+      "document": "Privacy Policy",
+      "version": "3.0",
+      "section": "13",
+      "quote": "Personal information will be managed in line with the Privacy Principles and any relevant retention requirements. Information will be disposed when it is no longer required for any legitimate business purpose.",
+      "rule": "Personal information is disposed of when no longer required for any legitimate business purpose, and managed under any relevant retention requirements. The policy states no fixed period. Never state one."
+    },
+    {
+      "id": "PR5",
+      "document": "Privacy Policy",
+      "version": "3.0",
+      "section": "9.1",
+      "quote": "RIMPA Global will not use personal information for any purpose which an individual would not reasonably expect unless it is consistent with the Privacy Principles.",
+      "rule": "Do not use personal information for a purpose the person would not reasonably expect, unless it is consistent with the Privacy Principles. A claim that no consent or check is needed for a new use is not supported by this."
+    },
+    {
+      "id": "PR3",
+      "document": "Privacy Policy",
+      "version": "3.0",
+      "section": "1-16 (whole document checked)",
+      "quote": "No provision found",
+      "rule": "GAP: the Privacy Policy says nothing about AI tools or automated decisions. Sections checked: 1 to 16, searched for artificial intelligence, AI, automated, algorithm, machine, chatbot and generative. The only hits were cookies, email logging and member profiles. Any advice on AI use is TrustLens guidance, not RIMPA policy."
+    },
+    {
+      "id": "CP1",
+      "document": "Code of Professional Conduct",
+      "version": "3.0",
+      "section": "7.3",
+      "quote": "Equity and inclusion: Promote an inclusive environment free from discrimination, harassment, and bias",
+      "rule": "Do not generalise about a group of people. Treat people without discrimination, harassment or bias."
+    },
+    {
+      "id": "CP2",
+      "document": "Code of Professional Conduct",
+      "version": "3.0",
+      "section": "7.4",
+      "quote": "Honesty and transparency: Act with honesty, integrity, and transparency in professional duties, ensuring professional judgment is not compromised by bias or personal interest … Confidentiality: Respect confidentiality of information acquired in professional activities and only disclose confidential information with proper authority or when required by law",
+      "rule": "Be honest and transparent. Disclose confidential information only with proper authority or when the law requires it."
+    },
+    {
+      "id": "EC1",
+      "document": "Election Campaign Code of Conduct",
+      "version": "2.0",
+      "section": "7.1",
+      "quote": "Nominees shall conduct approved campaigning with integrity, honesty, and transparency, ensuring all statements are accurate and truthful. … Nominees shall not use misleading or false information to gain an advantage.",
+      "rule": "Election statements must be accurate and truthful. Misleading or false information is not allowed."
+    },
+    {
+      "id": "EC2",
+      "document": "Election Campaign Code of Conduct",
+      "version": "2.0",
+      "section": "7.2",
+      "quote": "All communications regarding the election shall be conducted in a civil manner, refraining from personal attacks or derogatory language.",
+      "rule": "Election communications must be civil. No personal attacks or derogatory language."
+    },
+    {
+      "id": "EC3",
+      "document": "Election Campaign Code of Conduct",
+      "version": "2.0",
+      "section": "7.4",
+      "quote": "Nominees may only engage in campaigning methods such as distributing promotional materials or engaging in active promotion of their nomination with the approval of the CEO or the Board Governance & Risk Lead (unless this role is to be elected). … Nominees are unable to promise or commit to changes relating to RIMPA Global policies, procedures, or additional member benefits as part of their campaigning.",
+      "rule": "Campaign methods need approval from the CEO or the Board Governance & Risk Lead. Nominees cannot promise changes to policies, procedures or member benefits."
+    },
+    {
+      "id": "EC4",
+      "document": "Election Campaign Code of Conduct",
+      "version": "2.0",
+      "section": "7.8",
+      "quote": "Allegations of a nominee not adhering to this code of conduct are to be reported immediately to the CEO and referred to the Grievance Committee in accordance with the Complaints and Grievance Policy.",
+      "rule": "Report an allegation that a nominee broke the code to the CEO straight away. It is then referred under the Complaints and Grievance Policy."
+    },
+    {
+      "id": "V1",
+      "document": "Document control tables (Privacy Policy, Code of Professional Conduct, Election Campaign Code of Conduct, Complaints and Grievance Policy)",
+      "version": "see parts",
+      "section": "1",
+      "quote": "3.0 11 May 2026 … 3.0 8 June 2026 … 2.0 3 September 2025 … 3.0 18 November 2024",
+      "parts": [
+        {
+          "document": "Privacy Policy",
+          "version": "3.0",
+          "section": "1",
+          "quote": "3.0 11 May 2026"
+        },
+        {
+          "document": "Code of Professional Conduct",
+          "version": "3.0",
+          "section": "1",
+          "quote": "3.0 8 June 2026"
+        },
+        {
+          "document": "Election Campaign Code of Conduct",
+          "version": "2.0",
+          "section": "1",
+          "quote": "2.0 3 September 2025"
+        },
+        {
+          "document": "Complaints and Grievance Policy",
+          "version": "3.0",
+          "section": "1",
+          "quote": "3.0 18 November 2024"
+        }
+      ],
+      "rule": "Current versions: Privacy Policy v3.0 (11 May 2026), Code of Professional Conduct v3.0 (8 June 2026), Election Campaign Code of Conduct v2.0 (3 September 2025), Complaints and Grievance Policy v3.0 (18 November 2024). A claim about these versions is supported if it matches."
     }
   ]
 }

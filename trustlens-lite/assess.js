@@ -1,9 +1,9 @@
 import { SYSTEM_PROMPT, buildUserPrompt, CLASSIFICATIONS, PII_TYPES } from './prompts.js';
+import { knownIds, retentionFor, CHECK_KEYS } from './cite.js';
 
 const STATUSES = ['OK', 'Check', 'Concern'];
 const CONFIDENCES = ['low', 'medium', 'high'];
 const LABELS = ['supported', 'contradicted', 'unverified'];
-const POLICY_ID = /^P\d+$/;
 const TIMEOUT_MS = 30000;
 
 // Newer Claude models reject non-default sampling parameters, so temperature is only sent to older ones.
@@ -21,7 +21,7 @@ export async function assess(maskedText, policyText, settings) {
       const report = validateReport(parseJson(raw));
       const dropped = filterEvidence(report, maskedText);
       enforceRules(report);
-      report.meta = { dropped_quotes: dropped, attempts: attempt };
+      report.meta = { dropped_quotes: dropped, dropped_ids: report.meta?.dropped_ids ?? 0, attempts: attempt };
       return report;
     } catch (err) {
       lastError = err;
@@ -86,11 +86,22 @@ const arr = (v, name) => {
   return v;
 };
 
+// Keeps only ids that exist in policies.json. Anything else the model cites is dropped.
+let droppedIds = 0;
+function validateBasis(v) {
+  const ids = Array.isArray(v) ? v : [];
+  const kept = [...new Set(ids.filter((id) => typeof id === 'string' && knownIds.has(id)))];
+  droppedIds += ids.length - kept.length;
+  return kept;
+}
+
 function validateCheck(v, name) {
   if (!isObj(v)) throw new Error(`${name} missing`);
   return {
+    basis: validateBasis(v.basis),
     status: oneOf(v.status, STATUSES, `${name}.status`),
     confidence: oneOf(v.confidence, CONFIDENCES, `${name}.confidence`),
+    headline: typeof v.headline === 'string' && v.headline.trim() ? v.headline.trim() : str(v.summary, `${name}.summary`), // older cached reports have no headline
     summary: str(v.summary, `${name}.summary`).slice(0, 300),
     evidence: arr(v.evidence, `${name}.evidence`).map((q) => str(q, `${name}.evidence item`)),
     next_step: str(v.next_step, `${name}.next_step`).slice(0, 200),
@@ -99,6 +110,7 @@ function validateCheck(v, name) {
 
 export function validateReport(r) {
   if (!isObj(r)) throw new Error('report is not an object');
+  droppedIds = 0;
   const bias = validateCheck(r.bias, 'bias');
 
   const accuracy = validateCheck(r.accuracy, 'accuracy');
@@ -118,21 +130,18 @@ export function validateReport(r) {
   const g = r.governance;
   governance.classification = oneOf(g.classification, CLASSIFICATIONS, 'governance.classification');
   governance.pii_types = arr(g.pii_types, 'governance.pii_types').map((t) => oneOf(t, PII_TYPES, 'pii_types item'));
-  governance.retention = str(g.retention, 'governance.retention').slice(0, 200);
+  governance.retention = str(g.retention, 'governance.retention').slice(0, 200); // replaced by code in enforceRules
   if (typeof g.ai_use_allowed !== 'boolean') throw new Error('governance.ai_use_allowed must be boolean');
   governance.ai_use_allowed = g.ai_use_allowed;
-  governance.policy_ids = arr(g.policy_ids, 'governance.policy_ids').map((p) => {
-    if (typeof p !== 'string' || !POLICY_ID.test(p)) throw new Error('policy_ids items look like "P1"');
-    return p;
-  });
 
-  return { bias, accuracy, deception, governance };
+  const stamp_reason = typeof r.stamp_reason === 'string' && r.stamp_reason.trim() ? r.stamp_reason.trim() : null;
+  return { stamp_reason, bias, accuracy, deception, governance, meta: { dropped_ids: droppedIds } };
 }
 
 // Drops any quote that is not an exact substring of the input. Returns how many were dropped.
 function filterEvidence(report, text) {
   let dropped = 0;
-  for (const check of Object.values(report)) {
+  for (const check of CHECK_KEYS.map((k) => report[k])) {
     const kept = check.evidence.filter((q) => text.includes(q));
     dropped += check.evidence.length - kept.length;
     check.evidence = kept.slice(0, 3);
@@ -142,11 +151,12 @@ function filterEvidence(report, text) {
 
 // Code-side rules from SPEC: no quotes means low confidence; claims need a real policy source.
 function enforceRules(report) {
-  for (const check of Object.values(report)) {
+  for (const check of CHECK_KEYS.map((k) => report[k])) {
     if (check.status !== 'OK' && check.evidence.length === 0) check.confidence = 'low';
   }
   for (const c of report.accuracy.claims) {
-    if (c.label !== 'unverified' && !POLICY_ID.test(c.source)) c.label = 'unverified';
+    if (c.label !== 'unverified' && !knownIds.has(c.source)) c.label = 'unverified';
     if (c.label === 'unverified') c.source = '';
   }
+  report.governance.retention = retentionFor(report); // the policies give no fixed period, so the model's wording is never used
 }

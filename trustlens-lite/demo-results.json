@@ -1,40 +1,55 @@
 [
   {
     "id": "A",
-    "subject": "Fraud trend - we need to tighten onboarding",
-    "file": "demo/emails/a.txt",
+    "subject": "Demo email A: complaint follow-up",
     "matchPhrases": [
-      "customers under 25 are far more likely to commit fraud",
-      "14-day hold on every new account"
+      "Casey did it",
+      "skip the investigation to save time"
     ],
+    "overall": {
+      "basis": [
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ],
+      "step": "Stop forwarding this. Move the notes to the secured case file and refer the matter to the CEO or Chair"
+    },
     "report": {
       "bias": {
         "status": "Concern",
         "confidence": "high",
-        "summary": "Potential concern: the email links fraud to customers under 25 as a group and proposes different treatment for them.",
+        "headline": "Groups members under 30",
+        "summary": "The email blames members under 30, as a group, for trouble at events.",
         "evidence": [
-          "customers under 25 are far more likely to commit fraud than everyone else",
-          "younger people just don't take rules seriously"
+          "members under 30 are always the ones causing trouble at our events"
         ],
-        "next_step": "Remove the age-based generalisation and base any checks on evidence about behaviour."
+        "next_step": "Remove the age-based generalisation and judge people on their own conduct.",
+        "basis": [
+          "CP1"
+        ]
       },
       "accuracy": {
         "status": "Concern",
         "confidence": "high",
-        "summary": "The fraud claim appears to conflict with the approved 2025 fraud review, and the 40% figure has no source.",
+        "headline": "Treats allegation as proven",
+        "summary": "The email states the bullying as fact before any investigation has made findings.",
         "evidence": [
-          "customers under 25 are far more likely to commit fraud than everyone else",
-          "About 40% of our confirmed cases come from that group"
+          "Casey did it - there is no doubt that Casey bullied the volunteers at the last chapter event"
         ],
-        "next_step": "Check the claim against the 2025 internal fraud review before using it.",
+        "next_step": "Refer to the matter as an allegation until findings are made.",
+        "basis": [
+          "C1",
+          "C5"
+        ],
         "claims": [
           {
-            "claim": "Customers under 25 are more likely to commit fraud",
-            "label": "contradicted",
-            "source": "P5"
+            "claim": "Casey bullied the volunteers at the last chapter event",
+            "label": "unverified",
+            "source": ""
           },
           {
-            "claim": "About 40% of confirmed cases come from that group",
+            "claim": "Members under 30 are always the ones causing trouble",
             "label": "unverified",
             "source": ""
           }
@@ -43,75 +58,101 @@
       "deception": {
         "status": "Check",
         "confidence": "medium",
-        "summary": "Some signals suggest the 40% figure has no source. These are not proof of intent.",
+        "headline": "Claims sound more certain than proof",
+        "summary": "Absolute words like \"no doubt\" and \"always\" suggest more certainty than the evidence shows.",
         "evidence": [
-          "It is obvious to anyone on the front line",
-          "About 40% of our confirmed cases come from that group"
+          "there is no doubt"
         ],
-        "next_step": "Ask Sam for the data behind the 40% figure.",
+        "next_step": "Ask Jess what evidence supports the claims before acting.",
+        "basis": [],
         "signals": [
-          "Appeal to common knowledge (\"obvious to anyone\")",
-          "Statistic given without a named source or date"
+          "Absolute language (\"there is no doubt\", \"always\")",
+          "No evidence or source given for the claims"
         ]
       },
       "governance": {
         "status": "Check",
         "confidence": "high",
-        "summary": "The email names a customer and includes contact details from a complaint record.",
+        "headline": "Names a complainant; wide list",
+        "summary": "The email names the complainant, shares their contact details and plans to circulate interview notes widely.",
         "evidence": [
-          "last month's complaint from Jordan Whitfield"
+          "so everyone on the staff list can see what happened"
         ],
-        "next_step": "Mask the customer details before using the text with any AI tool or sharing it.",
+        "next_step": "Move the notes to the secured case file; limit access to the committee.",
+        "basis": [
+          "C2",
+          "C3",
+          "PR1",
+          "PR2"
+        ],
         "classification": "Confidential - Personal Information",
         "pii_types": [
           "name",
           "email",
           "phone"
         ],
-        "retention": "Keep for seven years after case closure, then review for disposal.",
-        "ai_use_allowed": false,
-        "policy_ids": [
-          "P1",
-          "P2",
-          "P3",
-          "P4",
-          "P5"
-        ]
-      }
-    }
+        "retention": "Kept in a secured case file for the period defined in the RIMPA disposal authority, or the NAA records authorities if RIMPA has none (Complaints and Grievance Policy s12).",
+        "ai_use_allowed": false
+      },
+      "stamp_reason": "Allegation treated as proven; private details shared widely."
+    },
+    "file": "demo/emails/a.txt",
+    "kind": "email"
   },
   {
     "id": "B",
-    "subject": "FWD: READ THIS before Friday!!!",
-    "file": "demo/emails/b.txt",
+    "subject": "Demo email B: election forward",
     "matchPhrases": [
-      "wipe 90% of all staff emails this Friday",
-      "Only a fool would trust the official line"
+      "puppet of the old guard",
+      "before voting closes"
     ],
+    "overall": {
+      "basis": [
+        "EC1",
+        "EC2",
+        "EC4"
+      ],
+      "step": "Check who sent this. If the sender is a nominee, report it to the CEO"
+    },
     "report": {
       "bias": {
-        "status": "OK",
-        "confidence": "high",
-        "summary": "No signs of bias against a group of people were found.",
-        "evidence": [],
-        "next_step": "Keep the wording neutral if you reply."
+        "status": "Check",
+        "confidence": "medium",
+        "headline": "Personal attack on a nominee",
+        "summary": "The email calls Nominee Park a puppet and says they cannot be trusted.",
+        "evidence": [
+          "Nominee Park is a puppet of the old guard and cannot be trusted with a single dollar"
+        ],
+        "next_step": "Avoid passing on personal attacks; election messages should be civil.",
+        "basis": [
+          "EC2"
+        ]
       },
       "accuracy": {
         "status": "Check",
         "confidence": "medium",
-        "summary": "The claim that 90% of staff emails will be wiped is unverified.",
+        "headline": "Unverified claims, including the 80% figure",
+        "summary": "The 80% figure and the claim about hidden truth on fees have no source.",
         "evidence": [
-          "wipe 90% of all staff emails this Friday"
+          "80% of members agree"
         ],
-        "next_step": "Ask the records team whether any such disposal is planned.",
+        "next_step": "Ask the sender for the source of the 80% figure.",
+        "basis": [
+          "EC1"
+        ],
         "claims": [
           {
-            "claim": "90% of all staff emails will be wiped this Friday",
+            "claim": "The Board has been hiding the truth about member fees for years",
             "label": "unverified",
             "source": ""
           },
           {
-            "claim": "A new retention rule was pushed through in secret",
+            "claim": "80% of members agree",
+            "label": "unverified",
+            "source": ""
+          },
+          {
+            "claim": "Nominee Rowe promises to scrap the Membership Policy in the first month",
             "label": "unverified",
             "source": ""
           }
@@ -120,15 +161,19 @@
       "deception": {
         "status": "Concern",
         "confidence": "medium",
-        "summary": "Potential concern: loaded language, and no named author, date or source. These are signals, not proof of intent.",
+        "headline": "Urgent, loaded language; no source",
+        "summary": "The message uses urgent, loaded language, names no author or source, and urges wide sharing.",
         "evidence": [
-          "SHOCKING: management is about to wipe 90% of all staff emails this Friday",
-          "Only a fool would trust the official line",
-          "Share this with everyone in your team NOW before it's too late!"
+          "URGENT: Nominee Rowe is the only one who will fight for you",
+          "Share this with every member you know before voting closes!",
+          "The Board has been hiding the truth about member fees for years"
         ],
-        "next_step": "Check the claim with the records team before forwarding it.",
+        "next_step": "Check who sent this before forwarding it.",
+        "basis": [
+          "EC1"
+        ],
         "signals": [
-          "Loaded and urgent language (\"SHOCKING\", \"NOW\")",
+          "Urgent and loaded language (\"URGENT\", \"hiding the truth\")",
           "No author, date or source named",
           "Pressure to forward the message widely"
         ]
@@ -136,84 +181,472 @@
       "governance": {
         "status": "OK",
         "confidence": "high",
+        "headline": "No personal information found",
         "summary": "The text appears to contain no personal information.",
         "evidence": [],
-        "next_step": "Keep it inside the organisation.",
+        "next_step": "Keep it within the member election process.",
+        "basis": [],
         "classification": "Internal",
         "pii_types": [],
-        "retention": "No retention rule found in the policy pack.",
-        "ai_use_allowed": true,
-        "policy_ids": [
-          "P1"
-        ]
-      }
-    }
+        "retention": "Per RIMPA disposal authority or NAA records authority.",
+        "ai_use_allowed": true
+      },
+      "stamp_reason": "Unverified claims and loaded language in an election message."
+    },
+    "file": "demo/emails/b.txt",
+    "kind": "email"
   },
   {
     "id": "C",
-    "subject": "Library opening hours from 2 November (public notice)",
-    "file": "demo/emails/c.txt",
+    "subject": "Demo email C: updated governance documents",
     "matchPhrases": [
-      "Council Notice 2026-14",
-      "cleared for the public newsletter"
+      "cleared for the member newsletter",
+      "Version 3.0, dated 11 May 2026"
     ],
     "report": {
       "bias": {
         "status": "OK",
         "confidence": "high",
-        "summary": "No signs of one-sided wording were found.",
+        "headline": "No one-sided wording",
+        "summary": "The wording is neutral and factual.",
         "evidence": [],
-        "next_step": "Keep the wording as it is."
+        "next_step": "Keep the wording as it is.",
+        "basis": []
       },
       "accuracy": {
         "status": "OK",
         "confidence": "high",
-        "summary": "The opening hours match the approved Council notice.",
+        "headline": "Versions match the published documents",
+        "summary": "Both document versions and dates match the published document control tables.",
         "evidence": [
-          "Harbourview Library branches will open at 9:00 am on weekdays",
-          "Saturday hours stay 10:00 am to 4:00 pm"
+          "The Privacy Policy (Version 3.0, dated 11 May 2026)",
+          "the Code of Professional Conduct (Version 3.0, approved 8 June 2026)"
         ],
-        "next_step": "Cite Council Notice 2026-14 when you share this.",
+        "next_step": "Link to the Governance page when you share this.",
+        "basis": [
+          "V1"
+        ],
         "claims": [
           {
-            "claim": "Branches open at 9:00 am on weekdays from 2 November 2026",
+            "claim": "The Privacy Policy is Version 3.0, dated 11 May 2026",
             "label": "supported",
-            "source": "P5"
+            "source": "V1"
           },
           {
-            "claim": "Saturday hours are 10:00 am to 4:00 pm",
+            "claim": "The Code of Professional Conduct is Version 3.0, approved 8 June 2026",
             "label": "supported",
-            "source": "P5"
+            "source": "V1"
           }
         ]
       },
       "deception": {
         "status": "OK",
         "confidence": "high",
-        "summary": "The email names its source, date and approver.",
+        "headline": "Source and location are named",
+        "summary": "The email names both documents and where to find them.",
         "evidence": [
-          "Source: Harbourview Council Notice 2026-14, published 12 October 2026"
+          "available on the Governance page at rimpa.com.au/about-us/governance.html"
         ],
-        "next_step": "Keep the source line with the text.",
+        "next_step": "Keep the link with the text.",
+        "basis": [],
         "signals": []
       },
       "governance": {
         "status": "OK",
         "confidence": "high",
-        "summary": "The notice is marked as approved for public release.",
+        "headline": "Cleared for the member newsletter",
+        "summary": "The item is marked as cleared for the member newsletter.",
         "evidence": [
-          "cleared for the public newsletter"
+          "cleared for the member newsletter"
         ],
-        "next_step": "Share it with anyone who needs it.",
+        "next_step": "Share it with members as planned.",
+        "basis": [],
         "classification": "Public",
         "pii_types": [],
-        "retention": "No retention rule found in the policy pack.",
-        "ai_use_allowed": true,
-        "policy_ids": [
-          "P1",
-          "P5",
-          "P6"
+        "retention": "Per RIMPA disposal authority or NAA records authority.",
+        "ai_use_allowed": true
+      },
+      "stamp_reason": "Neutral, accurate and cleared for members."
+    },
+    "file": "demo/emails/c.txt",
+    "kind": "email"
+  },
+  {
+    "id": "F1",
+    "kind": "file",
+    "subject": "Case note: member complaint 2026-07",
+    "file": "demo/docs/01-case-note.md",
+    "matchPhrases": [
+      "casey did it",
+      "skip the investigation to save time"
+    ],
+    "overall": {
+      "basis": [
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ],
+      "step": "Stop circulating this. Move the notes to the secured case file and refer the matter to the CEO or Chair"
+    },
+    "report": {
+      "stamp_reason": "Allegation treated as proven; private details shared widely.",
+      "bias": {
+        "status": "Concern",
+        "confidence": "high",
+        "headline": "Groups members under 30",
+        "summary": "The note blames members under 30, as a group, for trouble at events.",
+        "evidence": [
+          "Members under 30 are always the ones causing trouble at our events"
+        ],
+        "next_step": "Remove the age-based generalisation and judge people on their own conduct.",
+        "basis": [
+          "CP1"
         ]
+      },
+      "accuracy": {
+        "status": "Concern",
+        "confidence": "high",
+        "headline": "Treats allegation as proven",
+        "summary": "The note states the bullying as fact, although the respondent has not been interviewed.",
+        "evidence": [
+          "Casey did it: there is no doubt that Casey bullied the volunteers at the last chapter event",
+          "Casey has not been interviewed"
+        ],
+        "next_step": "Refer to the matter as an allegation until findings are made.",
+        "basis": [
+          "C1",
+          "C5"
+        ],
+        "claims": [
+          {
+            "claim": "Casey bullied the volunteers at the last chapter event",
+            "label": "unverified",
+            "source": ""
+          },
+          {
+            "claim": "Members under 30 are always the ones causing trouble",
+            "label": "unverified",
+            "source": ""
+          }
+        ]
+      },
+      "deception": {
+        "status": "Check",
+        "confidence": "medium",
+        "headline": "Claims sound more certain than proof",
+        "summary": "Absolute words like \"no doubt\" and \"always\" suggest more certainty than the evidence shows.",
+        "evidence": [
+          "there is no doubt"
+        ],
+        "next_step": "Ask Jess what evidence supports the claims before acting.",
+        "basis": [],
+        "signals": [
+          "Absolute language (\"there is no doubt\", \"always\")",
+          "No evidence or source given for the claims"
+        ]
+      },
+      "governance": {
+        "status": "Check",
+        "confidence": "high",
+        "headline": "Names a complainant; wide list",
+        "summary": "The note names the complainant, includes their contact details and proposes circulating the notes widely.",
+        "evidence": [
+          "Circulate these notes to the whole staff list so everyone can see what happened"
+        ],
+        "next_step": "Move the notes to the secured case file; limit access to the committee.",
+        "basis": [
+          "C2",
+          "C3",
+          "PR1",
+          "PR2"
+        ],
+        "classification": "Confidential - Personal Information",
+        "pii_types": [
+          "name",
+          "email",
+          "phone"
+        ],
+        "retention": "Kept in a secured case file for the period defined in the RIMPA disposal authority, or the NAA records authorities if RIMPA has none (Complaints and Grievance Policy s12).",
+        "ai_use_allowed": false
+      }
+    }
+  },
+  {
+    "id": "F2",
+    "kind": "file",
+    "subject": "Election flyer: Vote Rowe",
+    "file": "demo/docs/02-election-flyer.md",
+    "matchPhrases": [
+      "puppet of the old guard",
+      "before voting closes"
+    ],
+    "overall": {
+      "basis": [
+        "EC1",
+        "EC2",
+        "EC4"
+      ],
+      "step": "Check who sent this. If the sender is a nominee, report it to the CEO"
+    },
+    "report": {
+      "stamp_reason": "Unverified claims and loaded language in an election message.",
+      "bias": {
+        "status": "Check",
+        "confidence": "medium",
+        "headline": "Personal attack on a nominee",
+        "summary": "The flyer calls Nominee Park a puppet and says they cannot be trusted.",
+        "evidence": [
+          "Nominee Park is a puppet of the old guard and cannot be trusted with a single dollar"
+        ],
+        "next_step": "Avoid passing on personal attacks; election messages should be civil.",
+        "basis": [
+          "EC2"
+        ]
+      },
+      "accuracy": {
+        "status": "Check",
+        "confidence": "medium",
+        "headline": "Unverified claims, including the 80% figure",
+        "summary": "The 80% figure and the claim about hidden truth on fees have no source.",
+        "evidence": [
+          "The Board has been hiding the truth about member fees for years and 80% of members agree"
+        ],
+        "next_step": "Ask the sender for the source of the 80% figure.",
+        "basis": [
+          "EC1"
+        ],
+        "claims": [
+          {
+            "claim": "The Board has been hiding the truth about member fees for years",
+            "label": "unverified",
+            "source": ""
+          },
+          {
+            "claim": "80% of members agree",
+            "label": "unverified",
+            "source": ""
+          },
+          {
+            "claim": "Nominee Rowe promises to scrap the Membership Policy in the first month",
+            "label": "unverified",
+            "source": ""
+          }
+        ]
+      },
+      "deception": {
+        "status": "Concern",
+        "confidence": "medium",
+        "headline": "Urgent, loaded language; no source",
+        "summary": "The flyer uses urgent, loaded language, names no author or source, and urges wide sharing.",
+        "evidence": [
+          "URGENT: Nominee Rowe is the only one who will fight for you",
+          "Share this with every member you know before voting closes!",
+          "Vote Rowe: the Board does not want you to know this"
+        ],
+        "next_step": "Check who sent this before forwarding it.",
+        "basis": [
+          "EC1"
+        ],
+        "signals": [
+          "Urgent and loaded language (\"URGENT\", \"hiding the truth\")",
+          "No author, date or source named",
+          "Pressure to share the flyer widely"
+        ]
+      },
+      "governance": {
+        "status": "OK",
+        "confidence": "high",
+        "headline": "No personal information found",
+        "summary": "The text appears to contain no personal information.",
+        "evidence": [],
+        "next_step": "Keep it within the member election process.",
+        "basis": [],
+        "classification": "Internal",
+        "pii_types": [],
+        "retention": "Per RIMPA disposal authority or NAA records authority.",
+        "ai_use_allowed": true
+      }
+    }
+  },
+  {
+    "id": "F3",
+    "kind": "file",
+    "subject": "Updated governance documents now on the website",
+    "file": "demo/docs/03-governance-update.md",
+    "matchPhrases": [
+      "cleared for the member newsletter",
+      "version 3.0, dated 11 may 2026"
+    ],
+    "report": {
+      "stamp_reason": "Neutral, accurate and cleared for members.",
+      "bias": {
+        "status": "OK",
+        "confidence": "high",
+        "headline": "No one-sided wording",
+        "summary": "The wording is neutral and factual.",
+        "evidence": [],
+        "next_step": "Keep the wording as it is.",
+        "basis": []
+      },
+      "accuracy": {
+        "status": "OK",
+        "confidence": "high",
+        "headline": "Versions match the published documents",
+        "summary": "Both document versions and dates match the published document control tables.",
+        "evidence": [
+          "The Privacy Policy (Version 3.0, dated 11 May 2026)",
+          "the Code of Professional Conduct (Version 3.0, approved 8 June 2026)"
+        ],
+        "next_step": "Link to the Governance page when you share this.",
+        "basis": [
+          "V1"
+        ],
+        "claims": [
+          {
+            "claim": "The Privacy Policy is Version 3.0, dated 11 May 2026",
+            "label": "supported",
+            "source": "V1"
+          },
+          {
+            "claim": "The Code of Professional Conduct is Version 3.0, approved 8 June 2026",
+            "label": "supported",
+            "source": "V1"
+          }
+        ]
+      },
+      "deception": {
+        "status": "OK",
+        "confidence": "high",
+        "headline": "Source and location are named",
+        "summary": "The item names both documents and where to find them.",
+        "evidence": [
+          "available on the Governance page at rimpa.com.au/about-us/governance.html"
+        ],
+        "next_step": "Keep the link with the text.",
+        "basis": [],
+        "signals": []
+      },
+      "governance": {
+        "status": "OK",
+        "confidence": "high",
+        "headline": "Cleared for the member newsletter",
+        "summary": "The item is marked as cleared for the member newsletter.",
+        "evidence": [
+          "Cleared for the member newsletter"
+        ],
+        "next_step": "Share it with members as planned.",
+        "basis": [],
+        "classification": "Public",
+        "pii_types": [],
+        "retention": "Per RIMPA disposal authority or NAA records authority.",
+        "ai_use_allowed": true
+      }
+    }
+  },
+  {
+    "id": "F4",
+    "kind": "file",
+    "subject": "Briefing: can we use member data with AI tools?",
+    "file": "demo/docs/04-ai-briefing.md",
+    "matchPhrases": [
+      "permits staff to upload member lists",
+      "last updated in 2019"
+    ],
+    "overall": {
+      "basis": [
+        "PR4",
+        "PR5",
+        "PR3",
+        "V1"
+      ],
+      "step": "Correct the policy claims before using this. Check the current Privacy Policy and the privacy contact before using member data with AI tools"
+    },
+    "report": {
+      "stamp_reason": "Claims about the Privacy Policy do not match the published policy.",
+      "bias": {
+        "status": "OK",
+        "confidence": "high",
+        "headline": "No one-sided wording",
+        "summary": "The briefing does not single out any group of people.",
+        "evidence": [],
+        "next_step": "Keep the wording neutral.",
+        "basis": []
+      },
+      "accuracy": {
+        "status": "Concern",
+        "confidence": "high",
+        "headline": "Policy claims contradict the published policy",
+        "summary": "Three claims about the Privacy Policy conflict with it, and one has no support in it.",
+        "evidence": [
+          "member records must be kept for seven years and cannot be disposed of earlier",
+          "The Privacy Policy was last updated in 2019 and has not changed since",
+          "No consent is needed to use member details for AI analysis"
+        ],
+        "next_step": "Correct the policy claims before relying on this briefing.",
+        "basis": [
+          "PR4",
+          "PR5",
+          "PR3",
+          "V1"
+        ],
+        "claims": [
+          {
+            "claim": "Member records must be kept for seven years and cannot be disposed of earlier",
+            "label": "contradicted",
+            "source": "PR4"
+          },
+          {
+            "claim": "The Privacy Policy permits staff to upload member lists to any cloud-based AI tool",
+            "label": "unverified",
+            "source": ""
+          },
+          {
+            "claim": "The Privacy Policy was last updated in 2019 and has not changed since",
+            "label": "contradicted",
+            "source": "V1"
+          },
+          {
+            "claim": "No consent is needed to use member details for AI analysis",
+            "label": "contradicted",
+            "source": "PR5"
+          }
+        ]
+      },
+      "deception": {
+        "status": "Check",
+        "confidence": "medium",
+        "headline": "AI-written, unreviewed, no source",
+        "summary": "The briefing says an AI wrote it, it is unreviewed, and it quotes no policy section.",
+        "evidence": [
+          "Draft generated by an AI assistant. Not yet reviewed."
+        ],
+        "next_step": "Ask a person to check each policy claim against the Privacy Policy.",
+        "basis": [],
+        "signals": [
+          "Written by an AI assistant and not yet reviewed",
+          "No policy sections are quoted"
+        ]
+      },
+      "governance": {
+        "status": "Check",
+        "confidence": "medium",
+        "headline": "Member data sent to AI without basis",
+        "summary": "The plan would send member data to an AI tool, and the Privacy Policy has no provision on AI tools.",
+        "evidence": [
+          "Go ahead and upload the full member list to an AI tool this week"
+        ],
+        "next_step": "Check the current Privacy Policy and privacy contact before using member data.",
+        "basis": [
+          "PR5",
+          "PR3"
+        ],
+        "classification": "Confidential - Personal Information",
+        "pii_types": [
+          "other"
+        ],
+        "retention": "Per RIMPA disposal authority or NAA records authority.",
+        "ai_use_allowed": false
       }
     }
   }

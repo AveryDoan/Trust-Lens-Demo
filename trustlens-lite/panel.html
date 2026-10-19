@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
+  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'wasm-unsafe-eval'; object-src 'self'">
   <title>TrustLens Lite</title>
   <link rel="stylesheet" href="panel.css">
 </head>
@@ -18,6 +19,8 @@
       <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/></symbol>
       <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
       <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+      <symbol id="i-history" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+      <symbol id="i-more" viewBox="0 0 24 24"><circle cx="5.5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="18.5" cy="12" r="1.2" fill="currentColor"/></symbol>
       <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></symbol>
     </defs>
   </svg>
@@ -26,16 +29,20 @@
     <img class="logo-mark" src="icons/logo-mark.png" alt="" width="32" height="32">
     <h1 class="wordmark">TrustLens <span>Lite</span></h1>
     <span id="demo-pill" class="demo-pill" hidden>Demo mode</span>
+    <button id="history-link" class="icon-btn" type="button" aria-label="History">
+      <svg class="icon" aria-hidden="true"><use href="#i-history"/></svg>
+    </button>
     <button id="settings" class="icon-btn" type="button" aria-label="Open settings">
       <svg class="icon" aria-hidden="true"><use href="#i-sliders"/></svg>
     </button>
   </header>
 
+  <input type="file" id="file-input" accept=".pdf,.docx,.txt,.md" hidden>
   <div id="live" class="sr-only" role="status" aria-live="polite"></div>
 
   <main id="view" tabindex="-1"></main>
 
-  <section class="input" aria-label="Text to check">
+  <section class="input" id="input-section" aria-label="Text to check">
     <details id="input-wrap">
       <summary><span>Text to check</span> <span id="source" class="muted num"></span></summary>
       <label class="sr-only" for="text">Text to check</label>
@@ -46,7 +53,7 @@
 
   <footer class="foot">
     <p>Signals, not proof. A person makes the final call.</p>
-    <button id="history-link" class="link" type="button">History</button>
+    <p>Policy basis: RIMPA Global published governance documents</p>
   </footer>
 
   <script type="module" src="panel.js"></script>
