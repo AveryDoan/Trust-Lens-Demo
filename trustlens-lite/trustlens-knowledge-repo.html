@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TrustLens AI Knowledge Repo</title>
+<style>
+:root{--bg:#f7f7fb;--card:#fff;--text:#1f2340;--mute:#5c6080;--line:#e2e3ef;--brand:#6d5bd0;
+--c1:#6d5bd0;--c2:#d9480f;--c3:#0b7285;--c4:#2b8a3e;--c5:#a61e4d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14152a;--card:#1e2040;--text:#eef0ff;--mute:#a7abd1;--line:#33365f;--brand:#a99cff;
+--c1:#a99cff;--c2:#ff9f6b;--c3:#5fd3e8;--c4:#7fd88f;--c5:#ff8fb8}}
+:root[data-theme="dark"]{--bg:#14152a;--card:#1e2040;--text:#eef0ff;--mute:#a7abd1;--line:#33365f;--brand:#a99cff;--c1:#a99cff;--c2:#ff9f6b;--c3:#5fd3e8;--c4:#7fd88f;--c5:#ff8fb8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+.wrap{max-width:1000px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:28px;margin:0 0 4px}
+.sub{color:var(--mute);margin:0 0 20px}
+.map{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:20px}
+.map div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:14px}
+.map b{display:block;margin-bottom:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.chip{border:1.5px solid var(--line);background:var(--card);color:var(--text);border-radius:999px;padding:7px 14px;font-size:14px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chip[aria-pressed="true"]{color:#14152a}}
+.count{color:var(--mute);font-size:13px;margin:8px 0 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.card{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.org{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
+.card h3{margin:0;font-size:16px}
+.card p{margin:0;font-size:14px}
+.use{background:var(--bg);border-radius:8px;padding:8px 10px;font-size:13px}
+.row{display:flex;justify-content:space-between;align-items:center;margin-top:auto;font-size:12px;color:var(--mute)}
+.card a{color:var(--brand);font-weight:600;text-decoration:none;font-size:14px}
+.tag{display:inline-block;border-radius:6px;padding:2px 8px;border:1px solid var(--c);color:var(--c);font-size:12px}
+.note{margin-top:28px;color:var(--mute);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>TrustLens AI Knowledge Repo</h1>
+<p class="sub">21 sources behind our idea. Tap a theme to filter. Tap Open to read the original.</p>
+
+<div class="map">
+<div><b>Is it biased?</b>AI ethics guides and real cases</div>
+<div><b>Is it accurate?</b>Misinformation codes and policy</div>
+<div><b>Could it mislead?</b>Provenance and content credentials</div>
+<div><b>How to manage?</b>Records and archives guidance</div>
+</div>
+
+<div class="chips" id="chips"></div>
+<div class="count" id="count"></div>
+<div class="grid" id="grid"></div>
+
+<p class="note">“Read in full” means we opened the page and summarised it. “From title” means the page blocked us or was not opened, so the summary uses the Hack Pack description. Please skim those before quoting them.</p>
+</div>
+
+<script>
+var T={
+rec:{n:"Records and archives",c:"var(--c1)"},
+mis:{n:"Misinformation and policy",c:"var(--c2)"},
+prov:{n:"Provenance and authenticity",c:"var(--c3)"},
+eth:{n:"AI ethics and real cases",c:"var(--c4)"},
+risk:{n:"High value, high risk records",c:"var(--c5)"}};
+var S=[
+["rec","NAA","Information management for records created using AI","How to manage records that AI creates.","Our handling tag: what to keep, label and classify.","https://www.naa.gov.au/information-management/manage-information-assets/types-information/information-management-records-created-using-artificial-intelligence-ai-technologies",0],
+["rec","NAA","Information management for current, emerging and critical technologies","Guidance on managing records from new technology.","Backs up our “works with tools people already use” point.","https://www.naa.gov.au/information-management/managing-information-assets/types-information/information-management-current-emerging-and-critical-technologies",0],
+["rec","NAA","Digital Preservation Policy","NAA’s framework for keeping digital records over time.","Why trust labels should stay with a file long term.","https://www.naa.gov.au/about-us/who-we-are/accountability-and-reporting/archival-policy-and-planning/digital-preservation-policy",0],
+["rec","Digital Transformation Agency","AI impact assessment: transparency and explainability","Tells agencies to disclose AI content, explain results in plain terms and keep records. Prompts and outputs may count as Commonwealth records.","Our “plain English result plus next step” and “you stay in control” design.","https://www.digital.gov.au/ai/impact-assessment-tool/guidance/transparency-and-explainability",1],
+["prov","Australian Signals Directorate","Content credentials: strengthening multimedia integrity","Guidance on verifying whether media is authentic.","Supports our provenance tag.","https://www.cyber.gov.au/publication/content-credentials-strengthening-multimedia-integrity-in-the-generative-ai-era",0],
+["mis","ACMA","Digital platforms’ efforts to combat disinformation and misinformation","Report on what platforms are doing against false content.","Shows the scale of the problem we are solving.","https://www.acma.gov.au/fourth-report-digital-platforms-efforts-under-voluntary-arrangements-combat-disinformation-and-misinformation",0],
+["mis","DIGI","Australian Code of Practice on Disinformation and Misinformation","A voluntary industry code. Signatories include Apple, Google, Meta and Microsoft, and publish yearly transparency reports. Updated June 2026.","Simple definitions we can reuse: misinformation may be shared by mistake, disinformation is deliberate.","https://digi.org.au/disinformation-code/",1],
+["mis","Australian Government","Response to the Senate Select Committee on Adopting AI","Government reply to the Senate AI inquiry.","Shows policy direction for AI in Australia.","https://www.industry.gov.au/publications/australian-government-response-senate-select-committee-adopting-artificial-intelligence-ai-report",0],
+["mis","GovTech Review","How the Australian Government can boost cybersecurity awareness","The case for one shared approach to security awareness.","Supports building for everyday staff, not experts.","https://www.govtechreview.com.au/content/gov-security/article/how-the-australian-government-can-boost-cybersecurity-awareness-1064078201",0],
+["rec","Archives New Zealand","Artificial intelligence and public records","AI outputs are public records. Organisations should document how AI is used and can use a records AI checklist.","A ready made checklist idea for our “next step” guidance.","https://www.archives.govt.nz/manage-information/how-to-manage-your-information/implementation/artificial-intelligence-and-public-records",1],
+["rec","RIMPA Global","RIMPA governance","About RIMPA, the organiser of this hackathon.","Know our audience and judges’ world.","https://www.rimpa.com.au/about-us/governance.html",0],
+["rec","Archives and Records Association UK and Ireland","AI Preparedness Guidelines for Archivists","Guidelines to prepare archives for AI.","Shows how information managers can lead on AI.","https://www.archives.org.uk/ai-preparedness-guidelines-for-archivists",0],
+["rec","The National Archives (UK)","Using AI for digital selection in government","Looks at using AI to choose which records to keep.","A real government use of AI on records.","https://www.nationalarchives.gov.uk/information-management/manage-information/preserving-digital-records/research-collaboration/using-ai-for-digital-selection-in-government/",0],
+["prov","C2PA","Technical specification 2.4","The technical standard for content provenance: where content came from and how it changed.","The standard behind our provenance tag.","https://spec.c2pa.org/specifications/specifications/2.4/index.html",0],
+["prov","Content Credentials","Content Credentials","A tool to check where media came from and its history.","The “nutrition label” idea we use in the pitch.","https://contentcredentials.org/",0],
+["eth","LinkedIn: Marina Hassapopoulou","Image enhancement in archives and reinterpretation","A post on AI image enhancement used in archives.","Real example of AI changing the record.","https://www.linkedin.com/posts/marina-hassapopoulou-b82ab084_artificialintelligence-creativeai-digitalpreservation-ugcPost-7444770336832815104-6noq/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAF5LLMMBsAk8e50eMSdTOa_5oXsSI2-AdMI",0],
+["eth","LinkedIn: D Chaffey","Problematic AI image sharpening","A call out of problematic AI image sharpening.","Story to open or support the problem slide.","https://www.linkedin.com/posts/dchaffey_problematic-use-of-ai-this-call-out-was-share-7491648596656717824-4CTB/?utm_source=share&utm_medium=member_desktop&rcm=ACoAAF5LLMMBsAk8e50eMSdTOa_5oXsSI2-AdMI",0],
+["eth","Gartner","Lack of semantics causes inaccurate AI agents and wasted spending","Press release (May 2026): meaning and context improve AI accuracy.","Supports our accuracy tag and the cost of getting it wrong.","https://www.gartner.com/en/newsroom/press-releases/2026-05-11-gartner-says-lack-of-semantics-causes-inaccurate-artificial-intelligence-agents-and-wasted-spending",0],
+["eth","Georgetown University Library","Generative AI resources: ethics","A library guide on the ethics of generative AI.","Background for our bias tag.","https://guides.library.georgetown.edu/ai/ethics",0],
+["risk","State Records NSW","Identifying and managing high risk records","How to find and manage high value and high risk records in NSW.","Tells us which content needs the strongest warning.","https://www.nsw.gov.au/nsw-government/recordkeeping/plan/high-risk-records",0],
+["risk","Public Record Office Victoria","High value, high risk records","Managing high value and high risk records in Victoria.","Same idea, second state example.","https://prov.vic.gov.au/recordkeeping-government/a-z-topics/high-value-high-risk-records",0]
+];
+var sel="all",chips=document.getElementById("chips"),grid=document.getElementById("grid"),cnt=document.getElementById("count");
+function chip(k,l){var b=document.createElement("button");b.className="chip";b.textContent=l;b.setAttribute("aria-pressed",k===sel);b.onclick=function(){sel=k;draw()};chips.appendChild(b)}
+function draw(){chips.innerHTML="";chip("all","All ("+S.length+")");
+for(var k in T){chip(k,T[k].n+" ("+S.filter(function(s){return s[0]===k}).length+")")}
+grid.innerHTML="";var n=0;
+S.forEach(function(s){if(sel!=="all"&&s[0]!==sel)return;n++;
+var d=document.createElement("div");d.className="card";d.style.setProperty("--c",T[s[0]].c);
+var a=document.createElement("div");a.className="org";a.textContent=s[1];
+var h=document.createElement("h3");h.textContent=s[2];
+var p=document.createElement("p");p.textContent=s[3];
+var u=document.createElement("div");u.className="use";u.textContent="Use in TrustLens: "+s[4];
+var r=document.createElement("div");r.className="row";
+var t=document.createElement("span");t.className="tag";t.textContent=T[s[0]].n;
+var l=document.createElement("a");l.href=s[5];l.target="_blank";l.rel="noopener";l.textContent="Open";
+var m=document.createElement("span");m.textContent=s[6]?"Read in full":"From title";
+r.appendChild(m);r.appendChild(l);
+d.appendChild(a);d.appendChild(h);d.appendChild(p);d.appendChild(u);d.appendChild(t);d.appendChild(r);grid.appendChild(d)});
+cnt.textContent="Showing "+n+" sources"}
+draw();
+</script>
+</body>
+</html>
