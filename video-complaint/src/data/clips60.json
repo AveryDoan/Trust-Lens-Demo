@@ -1,0 +1,9 @@
+{
+  "_help": "For a real clip in public/clips/<name>.mp4: startFrom = frames to skip at the start; seconds = length of the part of the clip to use (it is sped up or slowed down to fill the scene). null plays the clip as recorded.",
+  "s1-gmail-scroll": { "startFrom": 0, "seconds": null },
+  "s2-panel-open": { "startFrom": 0, "seconds": null },
+  "s3-consent-review": { "startFrom": 0, "seconds": null },
+  "s4-checks": { "startFrom": 0, "seconds": null },
+  "s5-attachments": { "startFrom": 0, "seconds": null },
+  "s6-next-step": { "startFrom": 0, "seconds": null }
+}

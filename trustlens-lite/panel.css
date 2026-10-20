@@ -338,3 +338,7 @@ body.dragging .dropzone { border-style: solid; border-color: var(--accent); }
 .path-list li.path-callout { gap: var(--space-2); margin-block: var(--space-2); }
 .ev-meta .filedetails { padding: 0; border: 0; }
 .ev-list { margin-block-start: var(--space-2); }
+
+.guidance-note { color: var(--muted-foreground); font-weight: 600; }
+.collapsed-checks button.because { color: var(--muted-foreground); text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--muted-foreground) 50%, transparent); text-underline-offset: 3px; }
+.claims li .sbs { margin-block-start: var(--space-1); }

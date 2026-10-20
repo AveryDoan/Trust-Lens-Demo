@@ -1,0 +1,131 @@
+{
+ "_help": "Camera keyframes in screenshot coordinates (1694 x 928). frame = global frame (0-1799). cx, cy = the point at the centre of the picture; scale = zoom (1 = fills the frame, max 2.8). The camera eases between neighbouring keyframes; two keyframes with the same values make a hold.",
+ "keys": [
+  {
+   "frame": 0,
+   "cx": 847,
+   "cy": 464,
+   "scale": 1.0
+  },
+  {
+   "frame": 90,
+   "cx": 515,
+   "cy": 180,
+   "scale": 1.6
+  },
+  {
+   "frame": 110,
+   "cx": 515,
+   "cy": 180,
+   "scale": 1.6
+  },
+  {
+   "frame": 200,
+   "cx": 560,
+   "cy": 470,
+   "scale": 1.6
+  },
+  {
+   "frame": 232,
+   "cx": 336,
+   "cy": 777,
+   "scale": 2.0
+  },
+  {
+   "frame": 299,
+   "cx": 336,
+   "cy": 777,
+   "scale": 2.0
+  },
+  {
+   "frame": 326,
+   "cx": 1520,
+   "cy": 27,
+   "scale": 2.8
+  },
+  {
+   "frame": 352,
+   "cx": 1520,
+   "cy": 27,
+   "scale": 2.8
+  },
+  {
+   "frame": 382,
+   "cx": 525,
+   "cy": 464,
+   "scale": 0.85
+  },
+  {
+   "frame": 722,
+   "cx": 525,
+   "cy": 464,
+   "scale": 0.85
+  },
+  {
+   "frame": 748,
+   "cx": 330,
+   "cy": 504,
+   "scale": 1.3
+  },
+  {
+   "frame": 830,
+   "cx": 330,
+   "cy": 504,
+   "scale": 1.3
+  },
+  {
+   "frame": 856,
+   "cx": 922,
+   "cy": 416,
+   "scale": 1.3
+  },
+  {
+   "frame": 960,
+   "cx": 922,
+   "cy": 416,
+   "scale": 1.3
+  },
+  {
+   "frame": 986,
+   "cx": 561,
+   "cy": 415,
+   "scale": 2.0
+  },
+  {
+   "frame": 1050,
+   "cx": 561,
+   "cy": 415,
+   "scale": 2.0
+  },
+  {
+   "frame": 1076,
+   "cx": 336,
+   "cy": 777,
+   "scale": 1.5
+  },
+  {
+   "frame": 1250,
+   "cx": 336,
+   "cy": 777,
+   "scale": 1.5
+  },
+  {
+   "frame": 1410,
+   "cx": 336,
+   "cy": 777,
+   "scale": 1.5
+  },
+  {
+   "frame": 1436,
+   "cx": 525,
+   "cy": 464,
+   "scale": 0.85
+  },
+  {
+   "frame": 1799,
+   "cx": 525,
+   "cy": 464,
+   "scale": 0.85
+  }
+ ]
+}

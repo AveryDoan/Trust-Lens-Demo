@@ -5,7 +5,7 @@ import { Logo } from './ui';
 
 // The side panel, drawn at 420 px wide. Layouts follow the current panel (Review, result Level 1, evidence, path).
 export const PANEL_W = 420;
-const small = { fontSize: 12.5, color: C.muted } as const;
+export const small = { fontSize: 12.5, color: C.muted } as const;
 
 export const PanelHeader: React.FC = () => (
   <div style={{ width: PANEL_W, height: 48, boxSizing: 'border-box', background: C.background, borderLeft: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', gap: 8, padding: '0 16px', borderBottom: `1px solid ${C.border}` }}>
@@ -23,7 +23,7 @@ export const PanelFrame: React.FC<{ children: React.ReactNode }> = ({ children }
   </div>
 );
 
-const Btn: React.FC<{ primary?: boolean; hot?: number; pressed?: boolean; children: React.ReactNode }> = ({ primary, hot = 0, pressed, children }) => (
+export const Btn: React.FC<{ primary?: boolean; hot?: number; pressed?: boolean; children: React.ReactNode }> = ({ primary, hot = 0, pressed, children }) => (
   <span style={{ display: 'inline-flex', alignItems: 'center', height: 36, padding: '0 16px', borderRadius: 4, fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap',
     background: primary ? C.accent : 'transparent', color: primary ? C.accentFg : C.foreground, border: `1px solid ${primary ? C.accent : C.muted}`,
     outline: hot ? `${3 * hot}px solid ${C.accent}` : 'none', outlineOffset: 3, transform: `scale(${pressed ? 0.96 : 1})` }}>{children}</span>
@@ -99,7 +99,7 @@ export const ReadingView: React.FC<{ facts: any; ticks: number }> = ({ facts, ti
 );
 
 // ---------- S5, S6, S8: the result, Level 1, with optional evidence ----------
-export const ResultView: React.FC<{ footer?: string; facts: any; stampP: number; alsoP: number[]; collapsedP: number; evidenceP?: number; sheetP?: number; provP?: number; chipHot?: number; pressSee?: boolean }> = ({ footer, facts, stampP, alsoP, collapsedP, evidenceP = 0, sheetP = 0, provP = 0, chipHot = 0, pressSee }) => {
+export const ResultView: React.FC<{ after?: React.ReactNode; notedTap?: number; footer?: string; facts: any; stampP: number; alsoP: number[]; collapsedP: number; evidenceP?: number; sheetP?: number; provP?: number; chipHot?: number; pressSee?: boolean }> = ({ after, notedTap = 0, footer, facts, stampP, alsoP, collapsedP, evidenceP = 0, sheetP = 0, provP = 0, chipHot = 0, pressSee }) => {
   const s = facts.stamp;
   const a = facts.accuracy;
   return (
@@ -152,7 +152,8 @@ export const ResultView: React.FC<{ footer?: string; facts: any; stampP: number;
             <div style={{ fontSize: 12.5, fontWeight: 600, whiteSpace: 'nowrap' }}>{r.due}</div>
           </div>
         ))}
-        <div style={{ ...small, borderTop: `1px solid ${C.border}`, padding: '8px 0', opacity: collapsedP }}>{facts.collapsed}</div>
+        <div style={{ ...small, borderTop: `1px solid ${C.border}`, padding: '8px 0', opacity: collapsedP }}><span style={{ textDecoration: 'underline', textUnderlineOffset: 3, outline: notedTap ? `${2 * notedTap}px solid ${C.accent}` : 'none', outlineOffset: 3, borderRadius: 3 }}>{facts.collapsed}</span></div>
+        {after}
         {footer && <div style={{ ...small, borderTop: `1px solid ${C.border}`, padding: '8px 0', opacity: collapsedP }}>{footer}</div>}
       </div>
       {sheetP > 0 && (

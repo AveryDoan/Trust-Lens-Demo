@@ -22,16 +22,24 @@
     {
       "key": "bias",
       "label": "Bias",
-      "status": "ok",
+      "status": "check",
       "question": "Is the wording one-sided?",
-      "answer": "The complaint is firm and threatens media and legal action. The word 'fraud' is the customer's allegation, not a finding."
+      "answer": "The email generalises about accounts staff at small regional firms. That is a statement about a group, not a finding about this case.",
+      "quotes": [
+        {
+          "doc": "email",
+          "text": "Accounts staff at small regional firms like yours always inflate invoices and never read a contract."
+        }
+      ],
+      "basis": [],
+      "basisNote": "No clause in this policy pack covers bias. This is TrustLens guidance, not policy."
     },
     {
       "key": "accuracy",
       "label": "Accuracy",
       "status": "concern",
       "question": "Do the numbers and claims match the documents?",
-      "answer": "The invoice contradicts the agreement. The overcharge claim is supported. The fraud and other-customers claims are not shown in the documents."
+      "answer": "The invoice contradicts the agreement and the overcharge claim is supported. The refund deadline in the email is misinformation. The number of emails sent needs checking. The fraud and other-customers claims are not shown."
     },
     {
       "key": "misleading",
@@ -71,37 +79,10 @@
         "H4.2",
         "H4.4",
         "H1.3"
-      ],
-      "manage": [
-        {
-          "label": "Refund",
-          "text": "Hold the invoice, confirm clause 4 was not triggered, then issue the corrected invoice and refund. Billing Manager approves; Finance Director too, over $10,000.",
-          "basis": [
-            "H2.1",
-            "H3.1",
-            "H3.2"
-          ]
-        },
-        {
-          "label": "Privacy",
-          "text": "Restrict the thread to the complaints team and Privacy Officer. Report the exposure within 1 business day. Stop asking customers to email identity details.",
-          "basis": [
-            "H4.1",
-            "H4.2",
-            "H4.4"
-          ]
-        },
-        {
-          "label": "Conduct",
-          "text": "Refer the fraud allegation and the internal message to the Complaints Manager. The accounts team should not handle it.",
-          "basis": [
-            "H1.3"
-          ]
-        }
       ]
     }
   ],
-  "noConcernsLine": "No concerns: Bias",
+  "noConcernsLine": "Also noted: Bias",
   "case": {
     "type": "billing complaint",
     "documents": [
@@ -155,6 +136,14 @@
       {
         "claim": "Rush was never requested in writing",
         "status": "supported by the correspondence provided"
+      },
+      {
+        "claim": "Emailed the accounts team multiple times",
+        "status": "needs checking: the thread shows 3 emails from the customer (6, 9, 12 Oct); no other emails are shown"
+      },
+      {
+        "claim": "Agreement requires a refund within 5 business days",
+        "status": "misinformation: clause 6 says 10 business days after confirming the error"
       },
       {
         "claim": "This is fraud",

@@ -7,6 +7,8 @@ import { normQuote } from './case.js';
 export const NOT_FOUND = 'Not found in the file you dropped';
 export const NOT_READ = 'File not read';
 export const CLUE = 'A clue, not proof.';
+// Shown in place of a rule when a step has no clause (the policy pack does not cover it). Never an invented clause.
+export const GUIDANCE_NOTE = 'TrustLens guidance, not policy';
 
 // entry.doc -> which of the read documents holds the text
 const matchers = {
@@ -62,6 +64,7 @@ export function levelTwoItems(key, ev, raw) {
   if (!ev) return null;
   if (key === 'accuracy') return ev.steps.approve ?? null;
   if (key === 'governance') return ev.steps.privacy ?? null;
+  if (key === 'bias') return ev.steps.bias ?? null;
   if (key === 'misleading') {
     const at = (re, doc) => (raw?.steps?.approve ?? []).findIndex((e) => e.doc === doc && re.test(e.text ?? ''));
     const picks = [at(RUSH_INVOICE, 'invoice'), at(RUSH_AGREEMENT, 'agreement')].filter((i) => i >= 0).map((i) => ev.steps.approve[i]);

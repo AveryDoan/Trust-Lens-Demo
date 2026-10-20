@@ -5,6 +5,7 @@ import { cleanPages } from './extract.js';
 import { normaliseMeta } from './provenance.js';
 import { setPack, policies } from './policies.js';
 import { citation, citationsFor, knownIds } from './cite.js';
+import { caseEmailText } from './tests/case-email.mjs';
 
 const D = 'demo/case-complaint';
 const saved = JSON.parse(readFileSync(`${D}/demo-result-complaint.json`, 'utf8'));
@@ -72,8 +73,11 @@ await run('the onlyIf step is shown only when the invoice has provenance signals
 await run('document quotes in the saved JSON are exact substrings of the extracted PDF text', () => {
   const textByRole = { invoice: invoice.text, correspondence: thread.text };
   if (agreement) textByRole.agreement = agreement.text;
-  const bad = checkQuotes(saved, textByRole).filter((b) => b.role !== 'agreement' || agreement);
+  const email = caseEmailText();
+  if (email) textByRole.email = email;
+  const bad = checkQuotes(saved, textByRole).filter((b) => (b.role !== 'agreement' || agreement) && (b.role !== 'email' || email));
   assert.deepEqual(bad, []);
+  if (!email) console.log('        (case-email.txt is missing: the quote from the complaint email was not checked)');
   if (!agreement) console.log('        (agreement PDF not present: its quotes were not checked)');
 });
 await run('policy quotes come only from the policy files; an unknown id is dropped; the footer pack switches the cited document', () => {

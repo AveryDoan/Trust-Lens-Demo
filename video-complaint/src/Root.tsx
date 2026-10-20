@@ -6,11 +6,15 @@ import map from './data/demo-findings-map.json';
 import policies from './data/policies-harbourview.json';
 import counts from './data/counts.json';
 import evidence from './data/evidence-resolved.json';
+import pages from './data/doc-pages.json';
+import timeline60 from './data/timeline60.json';
+import { Demo60 } from './Demo60';
+import { Boxes60 } from './scenes60/Scenes60';
 import { buildFacts } from './facts';
 import { useLocalFonts } from './lib';
 import { FactsContext, S1, S2, S3, S4, S5 } from './scenes/scenes';
 
-const facts = buildFacts(result, map, counts, policies, evidence);
+const facts = buildFacts(result, map, counts, policies, evidence, pages);
 const SCENES: Record<string, React.FC> = { S1, S2, S3, S4, S5 };
 
 // Scenes must cover frames 0 to total-1 with no gap and no overlap.
@@ -27,4 +31,10 @@ const Demo: React.FC = () => {
   );
 };
 
-export const Root: React.FC = () => <Composition id="ComplaintDemo" component={Demo} durationInFrames={timeline.total} fps={timeline.fps} width={1920} height={1080} />;
+export const Root: React.FC = () => (
+  <>
+    <Composition id="ComplaintDemo" component={Demo} durationInFrames={timeline.total} fps={timeline.fps} width={1920} height={1080} />
+    <Composition id="ComplaintDemo60" component={Demo60} durationInFrames={timeline60.total} fps={timeline60.fps} width={1920} height={1080} defaultProps={{ facts, captions: true }} />
+    <Composition id="Boxes60" component={Boxes60} durationInFrames={1} fps={30} width={1920} height={1080} />
+  </>
+);

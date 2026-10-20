@@ -26,7 +26,7 @@ export const ATTACHMENTS = [
   { role: 'correspondence', name: 'Correspondence-thread.pdf' },
 ];
 
-export function buildFacts(result: Json, map: Json, counts: Json, policies: Json, evidence: Json) {
+export function buildFacts(result: Json, map: Json, counts: Json, policies: Json, evidence: Json, pages: Json = null) {
   const rec = result.case.reconciliation as Json[];
   const row = (item: string) => rec.find((r) => r.item === item);
   const invoiceNo = /INV-[A-Z0-9-]+/.exec(result.case.documents.find((d: Json) => d.role === 'invoice').keyFacts[0])![0];
@@ -64,6 +64,60 @@ export function buildFacts(result: Json, map: Json, counts: Json, policies: Json
       rule: { id: first.id, quote: first.quote as string, ref: `${first.id} · ${first.document} v${first.version}, s${first.section}`, others: (step.basis as string[]).slice(1).map((b) => clause(b).chip) },
     };
   };
+  // ----- the 60 second video: bias, claims, the rush comparison, who to contact -----
+  const claimParts = (status: string) => {
+    const m = /^(supported|needs checking|misinformation)\b[:\s]*(.*)$/i.exec(status);
+    if (!m) return { label: 'Not shown in the documents', reason: '' };
+    const label = ({ supported: 'Supported', 'needs checking': 'Needs checking', misinformation: 'Misinformation' } as Record<string, string>)[m[1].toLowerCase()];
+    return { label, reason: m[2].trim() ? cap(m[2].trim()) : '' };
+  };
+  const claimsAll = (result.case.claims as Json[]).map((c) => ({ claim: c.claim as string, ...claimParts(c.status) }));
+  const claimItems = evItems('claims');
+  const biasCheck = (result.checks as Json[]).find((c) => c.key === 'bias');
+  const approveItems = evItems('approve');
+  const owners: { owner: string; actions: string[] }[] = [];
+  for (const g of dueGroups) for (const st of g.steps) { const o = owners.find((x) => x.owner === st.owner); if (o) o.actions.push(st.action); else owners.push({ owner: st.owner, actions: [st.action] }); }
+  // The calculation behind "Agreed vs billed": every difference is computed here and must equal the saved result.
+  const cents = (n: number) => Math.round(n * 100);
+  const recRow = (item: string) => { const r = (result.case.reconciliation as Json[]).find((x) => x.item === item); if (!r) throw new Error(`reconciliation has no "${item}"`); return r; };
+  const calcLine = (item: string, label: string) => {
+    const r = recRow(item);
+    const diff = (cents(r.billed) - cents(r.agreed)) / 100;
+    if (cents(diff) !== cents(r.difference)) throw new Error(`${item}: ${r.billed} - ${r.agreed} is ${diff}, the saved result says ${r.difference}`);
+    return { label, expr: `${money(r.billed)} - ${money(r.agreed)} = ${signed(diff)}`, diff };
+  };
+  const rateRow = recRow('Rate per box (ex GST)'), subRow = recRow('Subtotal (ex GST)');
+  const boxes = Math.round(cents(subRow.agreed) / cents(rateRow.agreed));
+  if (boxes !== Math.round(cents(subRow.billed) / cents(rateRow.billed))) throw new Error('the agreed and billed sides do not have the same number of boxes');
+  if (cents(boxes * rateRow.difference) !== cents(subRow.difference)) throw new Error(`${boxes} x ${rateRow.difference} is not ${subRow.difference}`);
+  const calc = {
+    heads: { left: 'Invoice (billed)', right: 'Agreement (agreed)', tag: 'Source of truth' },
+    lines: [calcLine('Rate per box (ex GST)', 'Rate per box'), { label: 'Boxes', expr: boxes.toLocaleString('en-AU'), diff: 0 }, calcLine('Subtotal (ex GST)', 'Subtotal'), calcLine('GST (10%)', 'GST (10%)'), calcLine('Total (incl GST)', 'Total')],
+  };
+  // the claim note: the status text of the saved claim, as two short sentences
+  const noteOf = (reason: string) => reason.split(/;\s*/).map((p) => cap(p.trim()).replace(/\.$/, '') + '.').join(' ');
+  const claimStatusCount = (re: RegExp) => (result.case.claims as Json[]).filter((c) => re.test(c.status)).length;
+  const assess = {
+    title: 'Assessment',
+    rows: (result.checks as Json[]).map((c) => ({ key: c.key as string, label: c.label as string, status: c.status as string, question: c.question as string })),
+    tags: [`Misinformation (${claimStatusCount(/^misinformation/i)})`, `Needs checking (${claimStatusCount(/^needs checking/i)})`],
+  };
+  const confirm = (map.pathOnly as Json[]).find((x) => x.id === 'confirm');
+  const whoWords: [string, string][] = [[map.stamp.owner as string, 'approve'], [(map.alsoNeeded as Json[]).find((x) => x.id === 'refer').owner as string, 'referral'], [(map.alsoNeeded as Json[]).find((x) => x.id === 'privacy').owner as string, 'acknowledge and notify']];
+  const sixty = {
+    assess,
+    bias: { items: evItems('bias'), note: biasCheck.basisNote as string, shows: 'Source of truth' },
+    claims: {
+      needsChecking: { ...claimsAll.find((c) => c.label === 'Needs checking')!, note: noteOf(claimsAll.find((c) => c.label === 'Needs checking')!.reason), customer: claimItems[0], file: claimItems[1] },
+      misinformation: { ...claimsAll.find((c) => c.label === 'Misinformation')!, customer: claimItems[2], file: claimItems[3] },
+    },
+    rush: { agreed: approveItems.find((i) => i.doc === 'agreement' && /written rush request/.test(i.text))!, billed: approveItems.find((i) => i.doc === 'invoice' && /^Rush tier/.test(i.text))!, amounts: evStep('approve', map.stamp).amounts as string },
+    calc,
+    accounts: { action: confirm.action as string, because: becauseLine(confirm.because), owner: confirm.owner as string, due: day(confirm.due), guidance: confirm.guidance === true && confirm.basis.length === 0, customer: claimItems[0], file: claimItems[1], note: noteOf(claimsAll.find((c) => c.label === 'Needs checking')!.reason) },
+    // storyboard copy: the "Accounts team" row is not an owner in the saved data
+    who: [...whoWords.map(([o, w]) => ({ owner: o, role: w, hot: false })), { owner: 'Accounts team', role: 'confirm the emails', hot: true }],
+    pages,
+  };
   const typeParts = Object.entries(counts.byType as Record<string, number>).map(([t, n]) => `${n} ${PII_WORDS[t] ?? t}`);
 
   return {
@@ -92,10 +146,11 @@ export function buildFacts(result: Json, map: Json, counts: Json, policies: Json
       moreLabel: map.accuracyMoreLabel as string, claimsSummary: map.claimsSummary as string,
     },
     clause: clause(map.stamp.basis[0]),
+    sixty,
     evidence: { approve: evStep('approve', map.stamp), privacy: evStep('privacy', map.alsoNeeded.find((s: Json) => s.id === 'privacy')) },
     path: {
       today: { label: today, text: acknowledge.because.text as string },
-      groups: dueGroups.map((g) => ({ label: g.label, steps: g.steps.map((s) => ({ action: s.action, owner: s.owner, because: becauseLine(s.because), basis: s.basis as string[] })) })),
+      groups: dueGroups.map((g) => ({ label: g.label, steps: g.steps.map((s) => ({ action: s.action, owner: s.owner, because: becauseLine(s.because), basis: s.basis as string[], guidance: s.guidance === true })) })),
       outcome: { label: day(result.case.outcomeDue.date), text: `Written outcome due ${day(result.case.outcomeDue.date)}`, basis: result.case.outcomeDue.basis as string[] },
     },
     provenance: {
@@ -104,7 +159,11 @@ export function buildFacts(result: Json, map: Json, counts: Json, policies: Json
       signals: (prov.signals as string[]).map((id) => ({ id, label: SIGNAL_LABEL[id] })),
       hedge: 'A clue, not proof.',
     },
-    labels: { demo: 'Demo mode: saved example', footer: 'Policy basis: Harbourview complaints procedure', callouts: { bias: 'Bias', governance: 'Governance', policy: 'Policy' }, end: ['TrustLens Lite', 'Every step shows its evidence and its rule.', 'Demo data. Fictional.', 'RIMPA Global Hackathon 2026'] },
+    labels: { demo: 'Demo mode: saved example', footer: 'Policy basis: Harbourview complaints procedure', callouts: { bias: 'Bias', governance: 'Governance', policy: 'Policy' },
+      // copy supplied with the storyboard (the permission screen is a mock-up)
+      tools: ['Use this email', 'Check selected text', 'Drop a file', `Policy pack: ${cap(policies.pack)}`, 'History'],
+      consent: { title: 'Allow TrustLens to read:', rows: ['Email text', '3 attachments: Agreement, Invoice, Emails'], note: 'Masked on this device first. Nothing is sent until you press Run AI.', allow: 'Allow', notNow: 'Not now' },
+      counter: '3 attachments', recommended: 'Recommended next step', sourceOfTruth: 'Source of truth', seeAI: 'What the AI will see', end60: ['TrustLens Lite', 'Every action quotes the rule it comes from.', 'Demo data. Fictional.', 'RIMPA Global Hackathon 2026'], mockup: 'Mock-up', guidanceNote: 'TrustLens guidance, not policy', end: ['TrustLens Lite', 'Every step shows its evidence and its rule.', 'Demo data. Fictional.', 'RIMPA Global Hackathon 2026'] },
   };
 }
 export type Facts = ReturnType<typeof buildFacts>;

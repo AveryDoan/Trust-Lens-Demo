@@ -1,0 +1,129 @@
+{
+ "fps": 30,
+ "total": 1800,
+ "captionPx": 48,
+ "panel": {
+  "scale": 2.2,
+  "open": [
+   352,
+   378
+  ],
+  "closeAt": 1680,
+  "width": 420
+ },
+ "scenes": [
+  {
+   "id": "S1",
+   "clip": "s1-gmail-scroll",
+   "from": 0,
+   "to": 299,
+   "captions": [
+    {
+     "text": "A long, angry email. Three attachments.",
+     "from": 12,
+     "to": 290
+    }
+   ]
+  },
+  {
+   "id": "S2",
+   "clip": "s2-panel-open",
+   "from": 300,
+   "to": 449,
+   "captions": [
+    {
+     "text": "One click opens TrustLens.",
+     "from": 306,
+     "to": 444
+    }
+   ]
+  },
+  {
+   "id": "S3",
+   "clip": "s3-consent-review",
+   "from": 450,
+   "to": 649,
+   "captions": [
+    {
+     "text": "It asks first, and masks personal details.",
+     "from": 456,
+     "to": 644
+    }
+   ]
+  },
+  {
+   "id": "S4",
+   "clip": "s4-checks",
+   "from": 650,
+   "to": 1049,
+   "captions": [
+    {
+     "text": "It assesses four checks first.",
+     "from": 656,
+     "to": 716
+    },
+    {
+     "text": "Bias: one-sided wording.",
+     "from": 726,
+     "to": 826
+    },
+    {
+     "text": "Misinformation: a wrong deadline.",
+     "from": 836,
+     "to": 956
+    },
+    {
+     "text": "And what needs checking.",
+     "from": 966,
+     "to": 1046
+    }
+   ]
+  },
+  {
+   "id": "S5",
+   "clip": "s5-attachments",
+   "from": 1050,
+   "to": 1409,
+   "captions": [
+    {
+     "text": "It reads the attachments too.",
+     "from": 1056,
+     "to": 1136
+    },
+    {
+     "text": "Invoice against agreement, line by line.",
+     "from": 1146,
+     "to": 1286
+    },
+    {
+     "text": "It checks where the invoice came from.",
+     "from": 1296,
+     "to": 1406
+    }
+   ]
+  },
+  {
+   "id": "S6",
+   "clip": "s6-next-step",
+   "from": 1410,
+   "to": 1799,
+   "captions": [
+    {
+     "text": "Then the recommended next step.",
+     "from": 1416,
+     "to": 1496
+    },
+    {
+     "text": "Ask the accounts team to confirm.",
+     "from": 1566,
+     "to": 1650
+    },
+    {
+     "text": "Every action quotes its rule.",
+     "from": 1656,
+     "to": 1706
+    }
+   ]
+  }
+ ]
+}

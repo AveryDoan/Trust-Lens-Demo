@@ -1,4 +1,5 @@
 {
+  "emailSource": "src/data/email-from-screenshot.txt",
   "resolved": {
     "steps": {
       "approve": [
@@ -155,6 +156,60 @@
             "Author"
           ]
         }
+      ],
+      "bias": [
+        {
+          "kind": "quote",
+          "doc": "email",
+          "label": "Complaint email",
+          "shows": "Generalises about a group",
+          "status": "verified",
+          "page": null,
+          "file": "Open email",
+          "text": "Accounts staff at small regional firms like yours always inflate invoices and never read a contract."
+        }
+      ],
+      "claims": [
+        {
+          "kind": "quote",
+          "doc": "email",
+          "label": "Complaint email",
+          "shows": "Customer says. No other emails provided",
+          "status": "verified",
+          "page": null,
+          "file": "Open email",
+          "text": "I have emailed your accounts team multiple times."
+        },
+        {
+          "kind": "quote",
+          "doc": "emails",
+          "label": "Emails",
+          "shows": "Last customer email in the thread, 12 Oct",
+          "status": "verified",
+          "page": 2,
+          "file": "Correspondence-thread.pdf",
+          "text": "It has been six days with no reply."
+        },
+        {
+          "kind": "quote",
+          "doc": "email",
+          "label": "Complaint email",
+          "shows": "Customer says (misinformation)",
+          "status": "verified",
+          "page": null,
+          "file": "Open email",
+          "text": "Clause 6 of the agreement says you must refund any overcharge within 5 business days."
+        },
+        {
+          "kind": "quote",
+          "doc": "agreement",
+          "label": "Agreement",
+          "shows": "Clause 6 says",
+          "status": "verified",
+          "page": 2,
+          "file": "02-service-agreement-HRS-AGR-0311.pdf",
+          "text": "refund any overpayment within 10 business days of confirming the error."
+        }
       ]
     },
     "callouts": {
@@ -213,9 +268,21 @@
         "verified": 1,
         "notFound": 0,
         "notRead": 0
+      },
+      {
+        "id": "bias",
+        "verified": 1,
+        "notFound": 0,
+        "notRead": 0
+      },
+      {
+        "id": "claims",
+        "verified": 4,
+        "notFound": 0,
+        "notRead": 0
       }
     ],
-    "verified": 13,
+    "verified": 18,
     "notFound": 0,
     "notRead": 0
   }

@@ -81,7 +81,7 @@ assert.ok(!/Written outcome due/.test(flat), 'the outcome line is in the path, n
 assert.ok(!/Signals, not proof/.test(flat), 'the hedge is not in the footer; it is in the provenance evidence');
 assert.equal(map.stamp.action, saved.stamp.title);
 assert.equal(await ev("document.querySelector('.stamp-action').textContent"), saved.stamp.title);
-pass('Level 1: stamp with its Because, three Also needed rows, No concerns: Bias, one short footer line, 100 words or fewer');
+pass('Level 1: stamp with its Because, three Also needed rows, Also noted: Bias, one short footer line, 100 words or fewer');
 
 // the ... menu holds Follow advice and Override
 await ev("document.getElementById('more-btn').click(); 1"); await sleep(100);
@@ -112,7 +112,7 @@ assert.equal(await ev("document.querySelectorAll('.evidence').length"), 1, 'only
 assert.equal(await ev("document.querySelector('.evidence').dataset.evidence"), 'row:privacy');
 const gov = JSON.parse(await ev(`JSON.stringify({ found: [...document.querySelectorAll('.evidence .chip-plain')].map((c) => c.textContent), clauses: [...document.querySelectorAll('.evidence .policy-link')].length, manage: [...document.querySelectorAll('.evidence .manage')].map((m) => m.innerText.split(':')[0]) })`));
 assert.deepEqual(gov.found, ['Date of birth', 'Home address', 'Mobile numbers', 'Email addresses']);
-assert.deepEqual(gov.manage, ['Refund', 'Privacy', 'Conduct']); assert.ok(gov.clauses >= 4);
+assert.deepEqual(gov.manage, (saved.checks.find((c) => c.key === 'governance').manage ?? []).map((m) => m.label)); assert.ok(gov.clauses >= 4);
 await shot('evidence-governance');
 await ev("document.querySelectorAll('.also-row button.because')[1].click(); 1"); await sleep(200);
 assert.equal(await ev("document.querySelectorAll('.evidence').length"), 1);

@@ -1,55 +1,130 @@
 {
   "caseId": "case-complaint-meridian",
   "stamp": {
-    "because": { "check": "Accuracy", "status": "concern", "text": "Invoice is $11,880.00 above the agreement." },
+    "because": {
+      "check": "Accuracy",
+      "status": "concern",
+      "text": "Invoice is $11,880.00 above the agreement."
+    },
     "action": "Approve $11,880.00 refund and corrected invoice",
     "owner": "Billing Manager and Finance Director",
     "due": "2026-10-23",
-    "basis": ["H2.1", "H3.1", "H3.2"],
+    "basis": [
+      "H2.1",
+      "H3.1",
+      "H3.2"
+    ],
     "evidence": "accuracy"
   },
   "alsoNeeded": [
     {
       "id": "privacy",
-      "because": { "check": "Governance", "status": "concern", "text": "Personal details were sent by email." },
+      "because": {
+        "check": "Governance",
+        "status": "concern",
+        "text": "Personal details were sent by email."
+      },
       "action": "Notify the Privacy Officer",
       "owner": "Complaints team",
       "due": "2026-10-20",
-      "basis": ["H4.2", "H4.4"],
+      "basis": [
+        "H4.2",
+        "H4.4"
+      ],
       "evidence": "governance"
     },
     {
       "id": "refer",
-      "because": { "check": "Misleading", "status": "concern", "text": "An internal message suggests stalling." },
+      "because": {
+        "check": "Misleading",
+        "status": "concern",
+        "text": "An internal message suggests stalling."
+      },
       "action": "Refer to the Complaints Manager",
       "owner": "Complaints Manager",
       "due": "2026-10-20",
-      "basis": ["H1.3"],
+      "basis": [
+        "H1.3"
+      ],
       "evidence": "misleading"
     },
     {
       "id": "acknowledge",
-      "because": { "check": "Complaint", "status": "received", "text": "Received Mon 19 Oct." },
+      "because": {
+        "check": "Complaint",
+        "status": "received",
+        "text": "Received Mon 19 Oct."
+      },
       "action": "Acknowledge in writing",
       "owner": "Complaints team",
       "due": "2026-10-20",
-      "basis": ["H1.1"],
+      "basis": [
+        "H1.1"
+      ],
       "evidence": null
     }
   ],
   "pathOnly": [
     {
       "id": "verify",
-      "because": { "check": "Provenance", "status": "check", "text": "The invoice file was made after its printed date." },
+      "because": {
+        "check": "Provenance",
+        "status": "check",
+        "text": "The invoice file was made after its printed date."
+      },
       "action": "Confirm the invoice exists in the billing system",
       "owner": "Billing Manager",
       "due": "2026-10-20",
-      "basis": ["H2.3"],
+      "basis": [
+        "H2.3"
+      ],
       "onlyIf": "provenance signals on the invoice"
+    },
+    {
+      "id": "neutral",
+      "because": {
+        "check": "Bias",
+        "status": "check",
+        "text": "The email generalises about accounts staff."
+      },
+      "action": "Reply to the facts, not the generalisation",
+      "owner": "Complaints team",
+      "due": "2026-10-20",
+      "basis": [],
+      "guidance": true
+    },
+    {
+      "id": "confirm",
+      "because": {
+        "check": "Accuracy",
+        "status": "check",
+        "text": "The emails the customer says she sent are not all shown."
+      },
+      "action": "Ask the accounts team to confirm what they received",
+      "owner": "Complaints team",
+      "due": "2026-10-20",
+      "basis": [],
+      "guidance": true
     }
   ],
-  "collapsedChecks": "No concerns: Bias",
-  "accuracyDefaultRows": ["Rate per box (ex GST)", "Total (incl GST)"],
+  "collapsedChecks": "Also noted: Bias",
+  "accuracyDefaultRows": [
+    "Rate per box (ex GST)",
+    "Total (incl GST)"
+  ],
   "accuracyMoreLabel": "Show subtotal and GST",
-  "claimsSummary": "2 claims supported, 2 not shown in the documents."
+  "claimsSummary": "2 claims supported, 1 misinformation, 1 to check, 2 not shown in the documents.",
+  "noted": [
+    {
+      "id": "bias",
+      "because": {
+        "check": "Bias",
+        "status": "check",
+        "text": "Wording is one-sided."
+      },
+      "evidence": "bias",
+      "basis": [],
+      "guidance": true
+    }
+  ]
 }

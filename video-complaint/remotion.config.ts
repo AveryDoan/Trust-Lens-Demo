@@ -14,4 +14,5 @@ function listPublic(dir: string): string[] {
   const root = path.join(process.cwd(), 'public', dir);
   return fs.existsSync(root) ? fs.readdirSync(root).filter((f) => !f.startsWith('.')).map((f) => `${dir}/${f}`) : [];
 }
-fs.writeFileSync(path.join(process.cwd(), 'src', 'present.json'), JSON.stringify({ files: [...listPublic('clips'), ...listPublic('audio')] }, null, 2) + '\n');
+const rootFiles = fs.existsSync(path.join(process.cwd(), 'public', 'voiceover.mp3')) ? ['voiceover.mp3'] : [];
+fs.writeFileSync(path.join(process.cwd(), 'src', 'present.json'), JSON.stringify({ files: [...listPublic('clips'), ...listPublic('audio'), ...rootFiles] }, null, 2) + '\n');

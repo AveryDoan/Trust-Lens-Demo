@@ -56,12 +56,13 @@ await ev("window.__copied = []; navigator.clipboard.writeText = async (t) => { w
 await click('.bar .btn', 'Run AI'); await sleep(4300);
 await click('.reading .btn', 'Show recommendations'); await sleep(250);
 await click('.stamp-actions .btn', 'See the path'); await sleep(300);
-const steps = JSON.parse(await ev(`JSON.stringify([...document.querySelectorAll('.path-list li[data-step]')].map((li) => ({ id: li.dataset.step, order: [...li.children].map((c) => c.className.split(' ')[0] || c.tagName), items: li.querySelectorAll('.ev-item, .sbs-col').length, rule: !!li.querySelector('.ev-rule blockquote'), cite: [...li.querySelectorAll('.ev-rule .btn')].map((b) => b.textContent), meta: !!li.querySelector('.ev-meta'), copy: [...li.querySelectorAll('.ev-actions .btn')].map((b) => b.textContent), link: li.querySelector('.ev-list .textlink')?.textContent ?? null })))`));
+const steps = JSON.parse(await ev(`JSON.stringify([...document.querySelectorAll('.path-list li[data-step]')].map((li) => ({ id: li.dataset.step, order: [...li.children].map((c) => c.className.split(' ')[0] || c.tagName), items: li.querySelectorAll('.ev-item, .sbs-col').length, rule: !!li.querySelector('.ev-rule blockquote'), cite: [...li.querySelectorAll('.ev-rule .btn')].map((b) => b.textContent), meta: !!li.querySelector('.ev-meta'), copy: [...li.querySelectorAll('.ev-actions .btn')].map((b) => b.textContent), link: li.querySelector('.ev-list .textlink')?.textContent ?? null, guidance: li.querySelector('.guidance-note')?.textContent ?? null })))`));
 console.log('steps:', JSON.stringify(steps.map((s) => [s.id, s.items, s.link])));
-assert.deepEqual(steps.map((s) => s.id).sort(), ['acknowledge', 'approve', 'privacy', 'refer', 'verify']);
+assert.deepEqual(steps.map((s) => s.id).sort(), ['acknowledge', 'approve', 'confirm', 'neutral', 'privacy', 'refer', 'verify']);
 for (const s of steps) {
   assert.ok(s.items >= 1, `${s.id}: at least one evidence block`);
-  assert.ok(s.rule && s.cite.includes('Copy citation'), `${s.id}: the rule with Copy citation`);
+  if (['neutral', 'confirm'].includes(s.id)) { assert.ok(!s.rule && s.guidance === 'TrustLens guidance, not policy' && !s.cite.length, `${s.id}: the guidance note and no rule block`); }
+  else assert.ok(s.rule && s.cite.includes('Copy citation') && !s.guidance, `${s.id}: the rule with Copy citation`);
   assert.ok(s.copy.includes('Copy evidence'), `${s.id}: Copy evidence`);
   assert.deepEqual(s.order.slice(0, 5), ['path-due', 'path-action', 'path-owner', 'path-because', 'ev-list'], `${s.id}: action, owner, Because, Evidence, then Rule`);
 }
@@ -70,8 +71,11 @@ assert.ok(steps.every((s) => s.id === 'verify' || !s.meta));
 // every step: the first quote and a "Show all evidence (N)" link where there is more
 assert.equal(steps.find((s) => s.id === 'approve').link, 'Show all evidence (5)');
 assert.equal(steps.find((s) => s.id === 'privacy').link, 'Show all evidence (3)');
+assert.equal(steps.find((s) => s.id === 'neutral').link, null, 'one bias quote: nothing more to open');
+assert.equal(steps.find((s) => s.id === 'confirm').link, 'Show all evidence (4)');
 pass('Path: each step shows evidence, the rule with Copy citation, Copy evidence; verify shows the file details');
 
+await ev("document.querySelector('li[data-step=\"neutral\"]').scrollIntoView(); 1"); await sleep(100); await shot('path-neutral');
 // Agreed vs billed
 const sbs = JSON.parse(await ev(`JSON.stringify({ chips: [...document.querySelectorAll('li[data-step="approve"] .sbs .role-chip')].map((c) => c.textContent), quotes: [...document.querySelectorAll('li[data-step="approve"] .sbs blockquote')].map((q) => q.textContent), amounts: document.querySelector('li[data-step="approve"] .sbs-amounts')?.textContent, found: [...document.querySelectorAll('li[data-step="approve"] .sbs .ev-found')].map((f) => f.textContent.trim()) })`));
 assert.deepEqual(sbs.chips, ['Agreement', 'Invoice']);
@@ -132,7 +136,7 @@ await ev("document.querySelector('.stamp-because').click(); 1"); await sleep(200
 const l2 = JSON.parse(await ev(`JSON.stringify({ table: !!document.querySelector('.evidence table.recon'), sbs: !!document.querySelector('.evidence .sbs'), amounts: !!document.querySelector('.evidence .sbs-amounts'), order: [...document.querySelector('.evidence').children].map((c) => c.className || c.tagName), rule: document.querySelector('.evidence .ev-rule blockquote')?.textContent })`));
 assert.ok(l2.table && l2.sbs && !l2.amounts, 'the table keeps its place; the total line is not repeated under the side-by-side');
 assert.equal(l2.rule, 'An invoice must match the signed service agreement.');
-assert.equal(await ev("document.querySelectorAll('.evidence .ev-item[data-status=verified], .evidence .sbs-col').length"), 5);
+assert.equal(await ev("document.querySelectorAll('.evidence .ev-list .ev-item[data-status=verified], .evidence .ev-list .sbs-col').length"), 5);
 await ev("document.querySelectorAll('.also-row button.because')[0].click(); 1"); await sleep(200);
 const g = await ev("document.querySelector('.evidence').innerText");
 assert.match(g, /my date of birth is \[DOB\] and my home address is \[ADDRESS\]/); assert.match(g, /Rule/); assert.match(g, /Suspected exposure of personal information/);
@@ -145,12 +149,37 @@ const words = JSON.parse(await ev(`JSON.stringify(${WORDS})`));
 assert.ok(words.length <= 100, `${words.length} words`);
 pass(`Level 1 is ${words.length} words`);
 
+// Also noted: Bias (Level 1 line, opens the Bias evidence), and the claims in Accuracy
+const noted = JSON.parse(await ev(`JSON.stringify({ btn: document.querySelector('.collapsed-checks button.because')?.textContent, fits: document.documentElement.scrollHeight <= document.documentElement.clientHeight, noOld: !document.body.innerText.includes('No concerns: Bias') })`));
+assert.equal(noted.btn, 'Also noted: Bias'); assert.ok(noted.noOld); assert.ok(noted.fits, 'Level 1 fits 420 x 700 without scroll');
+await ev("document.querySelector('.collapsed-checks button.because').click(); 1"); await sleep(200);
+const bias = JSON.parse(await ev(`JSON.stringify({ n: document.querySelectorAll('.evidence').length, chips: [...document.querySelectorAll('.evidence .ev-head .role-chip')].map((c) => c.textContent), text: document.querySelector('.evidence').innerText, rule: !!document.querySelector('.evidence .ev-rule .btn') })`));
+assert.equal(bias.n, 1); assert.deepEqual(bias.chips, ['Complaint email']);
+assert.match(bias.text, /File not read/, 'the complaint email was not read in this flow');
+assert.ok(!/Small regional clients|does the same/.test(bias.text), 'no internal message in the bias view');
+assert.match(bias.text, /No clause in this policy pack covers bias\. This is TrustLens guidance, not policy\./);
+assert.ok(!bias.rule && !/Copy citation/.test(bias.text), 'no clause and no Copy citation for bias');
+await ev("document.querySelector('.collapsed-checks').scrollIntoView(); 1"); await shot('bias-evidence');
+await ev("document.querySelector('.collapsed-checks button.because').click(); 1");
+await ev("document.querySelector('.stamp-because').click(); 1"); await sleep(200);
+await ev("[...document.querySelectorAll('.evidence .textlink')].find((b) => b.textContent === 'See claims').click(); 1"); await sleep(150);
+const cl = JSON.parse(await ev(`JSON.stringify({ summary: document.querySelector('.evidence').innerText.includes('2 claims supported, 1 misinformation, 1 to check, 2 not shown in the documents.'), items: [...document.querySelectorAll('.evidence .claims li')].map((li) => [li.dataset.claimStatus, li.querySelector('.cl-status').textContent]), pairs: document.querySelectorAll('.evidence .claims li .sbs').length, text: document.querySelector('.evidence .claims').innerText })`));
+assert.ok(cl.summary, 'the new claims summary');
+assert.deepEqual(cl.items.map((i) => i[1]), ['Supported', 'Supported', 'Needs checking', 'Misinformation', 'Not shown in the documents', 'Not shown in the documents']);
+assert.match(cl.text, /Misinformation[\s\S]*Clause 6 says 10 business days after confirming the error/); assert.match(cl.text, /Needs checking[\s\S]*The thread shows 3 emails from the customer/);
+await ev("document.querySelector('.evidence .claims').scrollIntoView(); 1"); await shot('claims');
+assert.equal(cl.pairs, 2, 'two pairs: the customer sentence next to the file sentence');
+assert.match(cl.text, /refund any overpayment within 10 business days of confirming the error\./); assert.match(cl.text, /It has been six days with no reply\./);
+assert.match(cl.text, /File not read/); // the customer's sentences come from the complaint email, which was not read here
+await ev("document.querySelector('.stamp-because').click(); 1");
+pass('Also noted: Bias opens its evidence and the no-clause note; claims show misinformation and needs checking with reasons and paired quotes');
+
 // audit record: step ids and counts only
 const hist = JSON.parse(await ev("localStorage.getItem('tl-history')"));
 const audit = hist[0].case.evidence;
-assert.equal(audit.verified + audit.notFound + audit.notRead, 13, 'the 13 quotes in the five steps (the callout is not a step)');
-assert.equal(audit.notRead, 3, 'the three quotes from the open email were not read');
-assert.deepEqual(audit.steps.map((s) => s.id), ['approve', 'privacy', 'refer', 'acknowledge', 'verify']);
+assert.equal(audit.verified + audit.notFound + audit.notRead, 18, 'the 18 quotes in the seven steps (the callout is not a step)');
+assert.equal(audit.notRead, 6, 'the six quotes from the open email were not read');
+assert.deepEqual(audit.steps.map((s) => s.id), ['approve', 'privacy', 'refer', 'acknowledge', 'verify', 'bias', 'claims']);
 const raw = JSON.stringify(hist);
 for (const q of [...Object.values(evidence.steps).flat(), ...Object.values(evidence.callouts).flat()]) if (q.text) assert.ok(!raw.includes(q.text.slice(0, 25)), `audit holds quote text: ${q.text}`);
 pass(`Audit record: ${audit.verified} verified, ${audit.notFound} not found, ${audit.notRead} not read; no quote text`);

@@ -54,11 +54,35 @@ run('each step in the map is a step in the saved result (same owner, due and cla
 run('the accuracy rows named in the map exist, and the claims summary matches the claims', () => {
   const items = saved.case.reconciliation.map((r) => r.item);
   for (const r of map.accuracyDefaultRows) assert.ok(items.includes(r), r);
-  const supported = saved.case.claims.filter((c) => /^supported/.test(c.status)).length;
-  assert.equal(map.claimsSummary, `${supported} claims supported, ${saved.case.claims.length - supported} not shown in the documents.`);
+  const n = (re) => saved.case.claims.filter((c) => re.test(c.status)).length;
+  const shown = n(/^supported/) + n(/^misinformation/) + n(/^needs checking/);
+  assert.equal(map.claimsSummary, `${n(/^supported/)} claims supported, ${n(/^misinformation/)} misinformation, ${n(/^needs checking/)} to check, ${saved.case.claims.length - shown} not shown in the documents.`);
+  assert.equal(map.claimsSummary, '2 claims supported, 1 misinformation, 1 to check, 2 not shown in the documents.');
+});
+run('Bias is "check" with no clause and a note; the map names it as noted, and the two new path steps have no clause', () => {
+  const bias = saved.checks.find((c) => c.key === 'bias');
+  assert.equal(bias.status, 'check'); assert.deepEqual(bias.basis, []); assert.equal(bias.quotes.length, 1);
+  assert.equal(bias.basisNote, 'No clause in this policy pack covers bias. This is TrustLens guidance, not policy.');
+  assert.equal(map.collapsedChecks, 'Also noted: Bias'); assert.equal(saved.noConcernsLine, 'Also noted: Bias');
+  assert.deepEqual(map.noted.map((x) => [x.id, x.evidence, x.basis.length]), [['bias', 'bias', 0]]);
+  const added = map.pathOnly.filter((s) => s.guidance);
+  assert.deepEqual(added.map((s) => s.id), ['neutral', 'confirm']);
+  for (const s of added) { assert.deepEqual(s.basis, []); assert.ok(!s.onlyIf, 'always in the path'); assert.equal(s.due, '2026-10-20'); assert.equal(s.owner, 'Complaints team'); }
+});
+run('the claims list has the new statuses, each with its reason', () => {
+  const st = saved.case.claims.map((c) => c.status.split(':')[0]);
+  assert.deepEqual(st, ['supported', 'supported by the correspondence provided', 'needs checking', 'misinformation', 'not shown in the documents', 'not shown in the documents']);
+  assert.match(saved.case.claims[3].status, /clause 6 says 10 business days/);
+});
+run('the stamp, the amounts and the due dates are unchanged', () => {
+  assert.equal(saved.stamp.title, 'Approve $11,880.00 refund and corrected invoice');
+  assert.equal(saved.case.totals.difference, 11880); assert.equal(saved.case.totals.agreedTotal, 10164); assert.equal(saved.case.totals.billedTotal, 22044);
+  assert.equal(saved.stamp.due, '2026-10-23'); assert.equal(saved.case.outcomeDue.date, '2026-11-02');
+  assert.deepEqual(saved.case.nextSteps.map((s) => s.due), ['2026-10-20', '2026-10-20', '2026-10-20', '2026-10-20']);
 });
 run('the "How to manage" lines are in the saved result, each with clause ids that exist', () => {
   const g = saved.checks.find((c) => c.key === 'governance');
+  if (!g.manage) return console.log('        (the updated saved result has no "How to manage" lines: nothing to check)');
   assert.deepEqual(g.manage.map((m) => m.label), ['Refund', 'Privacy', 'Conduct']);
   const ids = new Set(pack.map((p) => p.id));
   for (const m of g.manage) for (const b of m.basis) assert.ok(ids.has(b), b);
@@ -71,6 +95,7 @@ run('because labels, and a live result gets a map of the same shape', () => {
   assert.equal(live.alsoNeeded.length, 3); assert.equal(live.pathOnly.length, 1);
   assert.ok(live.alsoNeeded.every((s) => s.because.text && s.action && s.owner && isWeekday(s.due)));
   assert.equal(live.claimsSummary, map.claimsSummary);
+  assert.deepEqual(live.noted.map((x) => x.id), ['bias']);
   assert.equal(addWeekdays('2026-10-19', 1), '2026-10-20');
 });
 

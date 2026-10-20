@@ -1,0 +1,27 @@
+{
+  "invoice": {
+    "name": "INV-DEMO-20417.pdf",
+    "before": "… reference HRS-AGR-0311 Customer Meridian Community Health Services Attention Elena Marsh, Chief Operating Officer Charges Description Quantity Unit price (ex GST) Amount (ex GST) Archive box digitisation, RUSH tier 2,400 boxes $8.35 $20,040.00 Subtotal (ex GST) $20,040.00 GST (10%) $2,004.00 Total due $22,044.00 Note: ",
+    "quote": "Rush tier applied because processing was completed within 30 days of collection.",
+    "after": " Payment Payment received 2 October 2026: $22,044.00 (receipt R-DEMO-5532). Balance: $0.00. Enquiries: [EMAIL]"
+  },
+  "correspondence": {
+    "name": "Correspondence-thread.pdf",
+    "before": "… Pike [EMAIL] To: Sam Lowe Date: 12 October 2026 Subject: FW: Invoice INV-DEMO-20417 Sam, don't bother refunding yet. ",
+    "quote": "Small regional clients always dispute invoices after paying and most of them give up if we stall for a month.",
+    "after": " Delete this once you have read it. Jordan",
+    "personal": {
+      "before": "… 9 October 2026 Subject: RE: RE: Invoice INV-DEMO-20417: rate looks wrong Jordan, To confirm my identity as you asked: ",
+      "quote": "my date of birth is [DOB] and my home address is [ADDRESS]",
+      "after": ". Clause 4 of the agreement says the rush rate applies only …"
+    }
+  },
+  "invoiceFull": {
+    "name": "INV-DEMO-20417.pdf",
+    "masked": "TAX INVOICE Harbourview Records Services Pty Ltd ABN 00 000 000 000 Level 3, [ADDRESS] Invoice number INV-DEMO-20417 Invoice date 25 September 2026 Due date 9 October 2026 Agreement reference HRS-AGR-0311 Customer Meridian Community Health Services Attention Elena Marsh, Chief Operating Officer Charges Description Quantity Unit price (ex GST) Amount (ex GST) Archive box digitisation, RUSH tier 2,400 boxes $8.35 $20,040.00 Subtotal (ex GST) $20,040.00 GST (10%) $2,004.00 Total due $22,044.00 Note: Rush tier applied because processing was completed within 30 days of collection. Payment Payment received 2 October 2026: $22,044.00 (receipt R-DEMO-5532). Balance: $0.00. Enquiries: [EMAIL]",
+    "masks": [
+      "address",
+      "email"
+    ]
+  }
+}

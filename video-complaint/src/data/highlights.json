@@ -1,0 +1,17 @@
+{
+  "_help": "Pixel boxes [x1, y1, x2, y2] in the 1694 x 928 screenshot (public/screens/gmail-complaint.png). Nudge a number and the highlight moves.",
+  "screenshot": { "width": 1694, "height": 928 },
+  "boxes": {
+    "bias": { "box": [76, 495, 583, 513], "text": "Accounts staff at small regional firms like yours always inflate invoices and never read a contract." },
+    "multiple": { "box": [430, 406, 692, 424], "text": "I have emailed your accounts team multiple times." },
+    "clause6": { "box": [690, 407, 1154, 425], "text": "Clause 6 of the agreement says you must refund any overcharge within 5 business days." },
+    "fraud": { "box": [653, 495, 958, 513], "text": "other customers have been overcharged in the same way" },
+    "rate": { "box": [340, 354, 506, 371], "text": "sets the price at $3.85 per box" },
+    "rush": { "box": [904, 354, 1094, 372], "text": "we never asked for rush processing" },
+    "subject": { "box": [78, 166, 952, 193], "text": "Formal complaint: overcharged $11,880 on invoice INV-DEMO-20417 - response required by Friday" },
+    "agreement": { "box": [79, 723, 241, 830], "text": "agreement attachment" },
+    "invoice": { "box": [256, 723, 417, 830], "text": "invoice attachment" },
+    "thread": { "box": [432, 723, 594, 830], "text": "correspondence attachment" },
+    "toolbar": { "box": [1500, 14, 1540, 40], "text": "TrustLens toolbar icon" }
+  }
+}

@@ -156,14 +156,20 @@ export function deriveFindings(r) {
       evidence: fam?.[2] ?? null, ...(s.onlyIf ? { onlyIf: s.onlyIf } : {}),
     };
   });
-  const supported = r.case.claims.filter((c) => /^supported/.test(c.status)).length;
+  const count = (re) => r.case.claims.filter((c) => re.test(c.status)).length;
+  const supported = count(/^supported/), misinfo = count(/^misinformation/), toCheck = count(/^needs checking/);
+  const notShown = r.case.claims.length - supported - misinfo - toCheck;
+  const claimsSummary = [`${supported} ${supported === 1 ? 'claim' : 'claims'} supported`, misinfo ? `${misinfo} misinformation` : '', toCheck ? `${toCheck} to check` : '', `${notShown} not shown in the documents`].filter(Boolean).join(', ') + '.';
+  const bias = r.checks.find((c) => c.key === 'bias');
   return {
     caseId: r.id,
     stamp: { because: { ...because('accuracy', 'Accuracy') }, action: r.stamp.title, owner: r.stamp.owner, due: r.stamp.due, basis: r.stamp.basis, evidence: 'accuracy' },
     alsoNeeded: steps.filter((s) => !s.onlyIf), pathOnly: steps.filter((s) => s.onlyIf),
     collapsedChecks: r.noConcernsLine,
     accuracyDefaultRows: ['Rate per box (ex GST)', 'Total (incl GST)'], accuracyMoreLabel: 'Show subtotal and GST',
-    claimsSummary: `${supported} ${supported === 1 ? 'claim' : 'claims'} supported, ${r.case.claims.length - supported} not shown in the documents.`,
+    claimsSummary,
+    // A check that is not "ok" but has no step of its own is noted on Level 1 and opens its evidence when tapped.
+    ...(bias && bias.status !== 'ok' ? { noted: [{ id: 'bias', because: { check: 'Bias', status: 'check', text: firstSentence(bias.answer) }, evidence: 'bias', basis: [], guidance: true }] } : {}),
   };
 }
 export const becauseLabel = (b) => `Because ${b.check} · ${cap(b.status)}`;

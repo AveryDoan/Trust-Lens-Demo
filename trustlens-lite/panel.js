@@ -3,7 +3,7 @@ import { overallAction } from './rules.js';
 import { findDemoEntry, cacheKey, sha256Hex } from './demo.js';
 import { extractFile, FileError, truncateAtWord, FILE_CHAR_LIMIT, formatSize, cleanText } from './extract.js';
 import { attachCitations, citationsFor, formatCitation, GUIDANCE_LABEL } from './cite.js';
-import { resolveEvidence, levelTwoItems, auditCounts, evidenceText, foundLine, NOT_FOUND, NOT_READ, CLUE } from './evidence.js';
+import { resolveEvidence, levelTwoItems, auditCounts, evidenceText, foundLine, NOT_FOUND, NOT_READ, CLUE, GUIDANCE_NOTE } from './evidence.js';
 import { setPack, activePack } from './policies.js';
 import { ROLE_LABELS, detectRole, findSavedCase, verifyCase, formatDay, money, signedMoney, checkSignals, hasAgreement, withoutAgreement, NO_AGREEMENT_NOTE, uniqueFiles, fileSummary, deriveFindings, becauseLabel } from './case.js';
 import { isEmptyMeta, normaliseMeta, NOTE, CLEAN, provenanceSignals, provenanceSummary } from './provenance.js';
@@ -929,6 +929,9 @@ function fileDetails(d, p, short = false) {
 }
 
 // ----- evidence: quotes from the files, each verified against the file that was read -----
+// Path steps whose evidence is kept under another step id in demo-evidence.json
+const EV_ALIAS = { neutral: 'bias', confirm: 'claims' };
+const evId = (step) => EV_ALIAS[step.id] ?? step.id;
 const evItems = (view, id) => view.evidence?.resolved.steps[id] ?? null;
 
 function quoteBlock(view, item) {
@@ -962,27 +965,29 @@ function sideBySide(view, items, withAmounts) {
   ];
 }
 
-// The rule for a step: the verbatim clause for its first basis id (attached by code from the policy file).
+// The rule for a step: the verbatim clause for its first known basis id (attached by code from the policy file).
+// Unknown ids are dropped. A step with no clause shows the guidance note and no rule block.
 function ruleBlock(view, basis, label) {
-  const cite = citationsFor(basis.slice(0, 1))[0];
-  if (!cite) return null;
-  const p = passages(cite)[0];
+  const cites = citationsFor(basis);
+  if (!cites.length) return h('p', { class: 'guidance-note small', 'data-guidance': 'true' }, GUIDANCE_NOTE);
+  const ids = cites.map((c) => c.id);
+  const p = passages(cites[0])[0];
   const flash = h('span', { class: 'copy-status', role: 'status' });
   return h('div', { class: 'ev-rule' },
     h('p', { class: 'ev-label' }, 'Rule'),
     h('blockquote', { class: 'quote' }, p.quote),
-    h('p', { class: 'small muted' }, `${basis[0]} · ${p.document} v${p.version}, s${p.section}`),
-    h('div', { class: 'ev-actions' }, h('button', { class: 'btn', type: 'button', onclick: () => copyCitation({ label, basis: basis.slice(0, 1) }, flash) }, 'Copy citation'), flash),
-    basis.length > 1 ? chipRow(basis.slice(1)) : null);
+    h('p', { class: 'small muted' }, `${ids[0]} · ${p.document} v${p.version}, s${p.section}`),
+    h('div', { class: 'ev-actions' }, h('button', { class: 'btn', type: 'button', onclick: () => copyCitation({ label, basis: ids.slice(0, 1) }, flash) }, 'Copy citation'), flash),
+    ids.length > 1 ? chipRow(ids.slice(1)) : null);
 }
 
 // Plain text for "Copy evidence": the action, the verified quotes with their file labels, and the rule. Redacted.
 function copyEvidenceButton(view, step, items) {
   const flash = h('span', { class: 'copy-status', role: 'status' });
-  const cite = citationsFor(step.basis.slice(0, 1))[0];
+  const cite = citationsFor(step.basis)[0];
   const btn = h('button', { class: 'btn', type: 'button', onclick: () => copyText(evidenceText({
     action: step.action, owner: step.owner, due: formatDay(step.due), because: step.because ? `${step.because.check}: ${step.because.text}` : '', items,
-    rule: cite ? `${step.basis[0]}: "${passages(cite)[0].quote}" (${passages(cite)[0].document} v${passages(cite)[0].version}, s${passages(cite)[0].section})` : '',
+    rule: cite ? `${cite.id}: "${passages(cite)[0].quote}" (${passages(cite)[0].document} v${passages(cite)[0].version}, s${passages(cite)[0].section})` : GUIDANCE_NOTE,
     date: new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }) }), flash) }, 'Copy evidence');
   return h('span', { class: 'ev-actions' }, btn, flash);
 }
@@ -1006,7 +1011,24 @@ function stepEvidence(view, id, { full = false, amounts = false } = {}) {
   return [h('div', { class: 'ev-list', 'data-step': id }, h('p', { class: 'ev-label' }, 'Evidence'), ...inline, box, link)];
 }
 
-const claimWord = (s) => (/^supported/.test(s) ? s[0].toUpperCase() + s.slice(1) : 'Not shown in the documents');
+// "needs checking: the thread shows ..." -> a label (text, not colour alone) and its reason
+const CLAIM_LABELS = { supported: 'Supported', 'needs checking': 'Needs checking', misinformation: 'Misinformation' };
+function claimParts(status) {
+  const m = /^(supported|needs checking|misinformation)\b[:\s]*(.*)$/i.exec(status);
+  if (!m) return { label: 'Not shown in the documents', reason: '' };
+  const reason = m[2].trim();
+  return { label: CLAIM_LABELS[m[1].toLowerCase()], reason: reason ? reason[0].toUpperCase() + reason.slice(1) : '' };
+}
+
+// The customer's sentence next to the document's sentence (the 'claims' evidence comes in pairs: customer, then the file).
+function pairBlock(view, left, right) {
+  const col = (item) => h('div', { class: 'sbs-col' }, h('span', { class: 'role-chip' }, item.label), h('span', { class: 'small muted' }, item.shows),
+    item.status === 'verified' ? h('blockquote', { class: 'quote' }, item.text) : h('p', { class: 'small muted' }, item.status === 'notread' ? NOT_READ : NOT_FOUND),
+    item.status === 'verified' ? h('p', { class: 'ev-found small' }, h('span', { 'aria-hidden': 'true' }, '✓ '), foundLine(item)) : null);
+  return h('div', { class: 'sbs' }, col(left), col(right));
+}
+// needs checking -> the first pair, misinformation -> the second
+const claimPairs = (view) => { const c = evItems(view, 'claims'); return c && c.length >= 4 ? { 'needs checking': [c[0], c[1]], misinformation: [c[2], c[3]] } : {}; };
 
 function accuracyEvidence(view) {
   const r = view.result;
@@ -1022,7 +1044,11 @@ function accuracyEvidence(view) {
   };
   fill();
   const moreBtn = h('button', { class: 'textlink', type: 'button', onclick: () => { expanded = true; fill(); moreBtn.remove(); } }, fm.accuracyMoreLabel);
-  const claims = h('ul', { class: 'claims', hidden: true }, r.case.claims.map((c) => h('li', {}, h('span', {}, c.claim), h('b', { class: 'cl-status' }, claimWord(c.status)))));
+  const claims = h('ul', { class: 'claims', hidden: true }, r.case.claims.map((c) => {
+    const { label, reason } = claimParts(c.status);
+    const pair = claimPairs(view)[label.toLowerCase()];
+    return h('li', { 'data-claim-status': label }, h('span', {}, c.claim), h('b', { class: 'cl-status' }, label), reason ? h('span', { class: 'small' }, reason) : null, pair ? pairBlock(view, pair[0], pair[1]) : null);
+  }));
   const claimsBtn = h('button', { class: 'textlink', type: 'button', 'aria-expanded': 'false', onclick: () => { claims.hidden = !claims.hidden; claimsBtn.setAttribute('aria-expanded', String(!claims.hidden)); claimsBtn.textContent = claims.hidden ? 'See claims' : 'Hide claims'; } }, 'See claims');
   return [
     view.noAgreement ? h('p', { class: 'small' }, NO_AGREEMENT_NOTE) : null,
@@ -1065,7 +1091,17 @@ function fileEvidence(view, i, withHedge = false) {
   return [fileDetails(d, p), withHedge ? h('p', { class: 'small muted' }, 'A clue, not proof. Signals, not proof. A person makes the final call.') : null];
 }
 
-const EVIDENCE = { accuracy: accuracyEvidence, governance: governanceEvidence, misleading: misleadingEvidence };
+// Bias: the quotes, then the note where a rule would normally appear. No clause in this pack covers bias, and none is invented.
+function biasEvidence(view) {
+  const c = view.result.checks.find((x) => x.key === 'bias');
+  const list = stepEvidence(view, 'bias', { full: true });
+  return [
+    ...(list.length ? list : (c.quotes ?? []).map((q) => h('blockquote', { class: 'quote' }, q.text))),
+    h('div', { class: 'ev-rule' }, h('p', { class: 'ev-label' }, 'Rule'), h('p', { class: 'small', 'data-guidance': 'true' }, c.basisNote ?? GUIDANCE_NOTE)),
+  ];
+}
+
+const EVIDENCE = { accuracy: accuracyEvidence, governance: governanceEvidence, misleading: misleadingEvidence, bias: biasEvidence };
 
 // Only one evidence panel is open at a time. It opens inside the element that asked for it.
 function toggleEvidence(key, host, button, build) {
@@ -1080,6 +1116,16 @@ function toggleEvidence(key, host, button, build) {
 function becauseButton(key, host, build, ...kids) {
   const btn = h('button', { class: 'because', type: 'button', 'aria-expanded': 'false', onclick: () => toggleEvidence(key, host, btn, build) }, ...kids);
   return btn;
+}
+
+// "Also noted: Bias": a muted line. Where the prepared findings name a noted check, tapping it opens that evidence in the same accordion.
+function notedLine(view) {
+  const fm = view.findings;
+  const host = h('div', { class: 'collapsed-checks ev-host' });
+  const n = fm.noted?.[0];
+  if (n && EVIDENCE[n.evidence]) host.append(becauseButton(`noted:${n.id}`, host, () => EVIDENCE[n.evidence](view), fm.collapsedChecks));
+  else host.append(fm.collapsedChecks);
+  return host;
 }
 
 function renderCaseReport(view) {
@@ -1124,7 +1170,7 @@ function renderCaseReport(view) {
       return li;
     })));
 
-  show(h('div', { class: 'report case' }, chipHost, view.noAgreement ? h('p', { class: 'agreement-note small' }, NO_AGREEMENT_NOTE) : null, card, also, h('p', { class: 'collapsed-checks' }, fm.collapsedChecks)));
+  show(h('div', { class: 'report case' }, chipHost, view.noAgreement ? h('p', { class: 'agreement-note small' }, NO_AGREEMENT_NOTE) : null, card, also, notedLine(view)));
   refreshFooter(view.mode === 'demo' ? 'Demo mode: saved result' : 'Live result', true);
   announce(`Result ready. ${stamp.action}.`);
 }
@@ -1134,7 +1180,7 @@ function renderPath(view) {
   const r = view.result;
   const fm = view.findings;
   const invoiceSignals = view.prov.some((p) => p.role === 'invoice' && checkSignals(p).length);
-  const steps = [{ ...fm.stamp, id: 'approve', because: fm.stamp.because, primary: true }, ...fm.alsoNeeded, ...(invoiceSignals ? fm.pathOnly : [])]
+  const steps = [{ ...fm.stamp, id: 'approve', because: fm.stamp.because, primary: true }, ...fm.alsoNeeded, ...fm.pathOnly.filter((s) => !s.onlyIf || invoiceSignals)]
     .sort((a, b) => a.due.localeCompare(b.due));
   const firstDue = steps[0].due;
   const timing = view.evidence?.resolved.callouts.tuesday;
@@ -1148,9 +1194,9 @@ function renderPath(view) {
       h('p', { class: 'path-action' }, s.action),
       h('p', { class: 'path-owner' }, s.owner),
       s.because ? h('p', { class: 'path-because' }, `Because ${s.because.check}: ${s.because.text}`) : null,
-      ...stepEvidence(view, s.id, { amounts: true }),
-      view.evidence ? ruleBlock(view, s.basis, s.action) : chipRow(s.basis),
-      view.evidence ? copyEvidenceButton(view, s, visibleItems(view, evItems(view, s.id) ?? [])) : null),
+      ...stepEvidence(view, evId(s), { amounts: true }),
+      view.evidence || !s.basis.length ? ruleBlock(view, s.basis, s.action) : chipRow(s.basis),
+      view.evidence ? copyEvidenceButton(view, s, visibleItems(view, evItems(view, evId(s)) ?? [])) : null),
   ]).filter(Boolean);
   show(h('section', { class: 'path' },
     h('h2', {}, 'Path to resolution'),
